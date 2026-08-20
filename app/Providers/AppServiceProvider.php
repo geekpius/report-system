@@ -58,16 +58,28 @@ class AppServiceProvider extends ServiceProvider
      */
     protected function configureRateLimiting(): void
     {
-        RateLimiter::for('api-login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower((string) $request->input('email')).'|'.$request->ip());
+        RateLimiter::for('api-login', fn (Request $request) => $this->apiAuthLimit($request));
+        RateLimiter::for('api-signup', fn (Request $request) => $this->apiAuthLimit($request));
+    }
 
-            return Limit::perMinute(5)->by($throttleKey);
-        });
+    /**
+     * Limit API auth attempts and return a JSON 429 when exceeded.
+     */
+    protected function apiAuthLimit(Request $request): Limit
+    {
+        $throttleKey = Str::transliterate(Str::lower((string) $request->input('email')).'|'.$request->ip());
 
-        RateLimiter::for('api-signup', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower((string) $request->input('email')).'|'.$request->ip());
+        return Limit::perMinute(5)
+            ->by($throttleKey)
+            ->response(function (Request $request, array $headers) {
+                $retryAfter = (int) ($headers['Retry-After'] ?? 60);
 
-            return Limit::perMinute(5)->by($throttleKey);
-        });
+                return response()->json([
+                    'message' => __('auth.throttle', [
+                        'seconds' => $retryAfter,
+                        'minutes' => (int) ceil($retryAfter / 60),
+                    ]),
+                ], 429, $headers);
+            });
     }
 }

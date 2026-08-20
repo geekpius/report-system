@@ -180,9 +180,17 @@ class AuthenticationTest extends TestCase
             ])->assertUnauthorized();
         }
 
-        $this->postJson(route('api.auth.login'), [
+        $response = $this->postJson(route('api.auth.login'), [
             'email' => $client->email,
             'password' => 'wrong-password',
-        ])->assertTooManyRequests();
+        ]);
+
+        $retryAfter = (int) $response->headers->get('Retry-After');
+
+        $response->assertTooManyRequests()
+            ->assertJsonPath('message', __('auth.throttle', [
+                'seconds' => $retryAfter,
+                'minutes' => (int) ceil($retryAfter / 60),
+            ]));
     }
 }
