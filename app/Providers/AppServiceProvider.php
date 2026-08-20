@@ -58,6 +58,7 @@ class AppServiceProvider extends ServiceProvider
     {
         RateLimiter::for('api-login', fn (Request $request) => $this->apiAuthLimit($request));
         RateLimiter::for('api-signup', fn (Request $request) => $this->apiAuthLimit($request));
+        RateLimiter::for('api-forgot-password', fn (Request $request) => $this->apiAuthLimit($request));
     }
 
     /**

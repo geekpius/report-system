@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Role;
+use App\Notifications\ResetClientPassword;
 use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -47,5 +48,10 @@ class Client extends Authenticatable
     public function schools(): HasMany
     {
         return $this->hasMany(School::class, 'owner_id');
+    }
+
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        $this->notify(new ResetClientPassword($token));
     }
 }

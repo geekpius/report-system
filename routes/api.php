@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\Auth\Profile\UpdateSchoolController;
 use App\Http\Controllers\Api\Auth\RegisteredClientController;
 use Illuminate\Support\Facades\Route;
@@ -12,6 +13,14 @@ Route::post('/auth/sign-up', [RegisteredClientController::class, 'store'])
 Route::post('/auth/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('throttle:api-login')
     ->name('api.auth.login');
+
+Route::post('/auth/forgot-password', [PasswordResetController::class, 'store'])
+    ->middleware('throttle:api-forgot-password')
+    ->name('api.auth.forgot-password');
+
+Route::post('/auth/reset-password', [PasswordResetController::class, 'update'])
+    ->middleware('throttle:api-forgot-password')
+    ->name('api.auth.reset-password');
 
 Route::middleware('auth:sanctum')->group(function () {
     // auth routes

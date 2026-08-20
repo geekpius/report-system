@@ -100,6 +100,13 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+
+        'clients' => [
+            'provider' => 'clients',
+            'table' => 'client_password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
     ],
 
     /*
