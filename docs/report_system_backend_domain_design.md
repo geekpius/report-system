@@ -4,9 +4,15 @@ This document defines the core domain models, relationships, pivot
 tables, use cases, and Laravel API structure for the School Management
 System.
 
-The system is designed around **Laravel as the backend** and **JWT-based
-authentication**. Since everything is scoped to a particular school,
-**School** is the main domain boundary.
+The system is designed around **Laravel as the backend**.
+
+-   **Web (Fortify / session)** authenticates the `User` model.
+    Users are **platform admins** who manage **all schools**.
+-   **API (Sanctum / bearer token)** authenticates the `Client` model.
+    Clients are school-scoped: owner, teacher, or student.
+
+Since school data is scoped to a particular school, **School** is the
+main domain boundary. Admins (`users`) sit above that boundary.
 
 ------------------------------------------------------------------------
 
@@ -14,11 +20,33 @@ authentication**. Since everything is scoped to a particular school,
 
 These are the main tables/entities.
 
+## 1.0 User (platform admin)
+
+Laravel's default `User` model. Used **only for the web app**.
+
+A user is a platform administrator who can manage every school. Users
+do not own a school (`schools.owner_id` points at `clients`, not
+`users`). Users do not log in through Sanctum API tokens.
+
+### `users`
+
+  Field          Description
+  -------------- ----------------------------------------------
+  `id`           Primary key
+  `name`         Admin name
+  `email`        Web login email
+  `password`     Hashed password
+  `created_at`   Creation timestamp
+  `updated_at`   Update timestamp
+
+------------------------------------------------------------------------
+
 ## 1.1 Client
 
-The login identity for the application. A client authenticates with
-email and password. The `role` field says how that client acts:
-owner, teacher, or student.
+The login identity for the **school API**. A client authenticates with
+email and password via Sanctum (bearer token), not the web admin
+session. The `role` field says how that client acts: owner, teacher, or
+student.
 
 A client can:
 
@@ -967,41 +995,51 @@ app/
 
 ------------------------------------------------------------------------
 
-# 11. Authentication --- Laravel + JWT
+# 11. Authentication --- Web User + API Client (Sanctum)
 
-The system should use JWT for API authentication.
+There are **two** authenticatable models.
 
-Basic flow:
+### Web --- `User` (Fortify session)
+
+Platform admins sign in on the Inertia site. Guard: `web`. Provider
+model: `App\Models\User`. Table: `users`.
+
+Admins manage all schools. They do not use Sanctum tokens.
+
+### API --- `Client` (Sanctum bearer token)
+
+School owners, teachers, and students sign in on the API. Guard:
+`auth:sanctum`. Model: `App\Models\Client` with `HasApiTokens`. Table:
+`clients`.
+
+Sanctum must **not** fall back to the `web` session for API routes, so
+an admin cookie cannot authenticate as a client. Use bearer tokens only
+for `/api/*`.
+
+Basic API flow:
 
 ``` text
-Frontend
+API client
    ↓
-POST /api/auth/login
+POST /api/auth/login  (Client email/password)
    ↓
 Laravel
    ↓
-Validate credentials
+Validate against `clients`
    ↓
-Generate JWT
+$client->createToken('api')
    ↓
-Return token
+Return plain-text token
    ↓
-Frontend
+Authorization: Bearer <TOKEN>
 ```
 
-Subsequent requests should include:
-
-``` http
-Authorization: Bearer <JWT_TOKEN>
-```
-
-Recommended authentication endpoints:
+Recommended API authentication endpoints:
 
 ``` text
 POST /api/auth/register
 POST /api/auth/login
 POST /api/auth/logout
-POST /api/auth/refresh
 GET  /api/auth/me
 ```
 
