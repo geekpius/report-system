@@ -29,6 +29,7 @@ class SchoolResource extends JsonResource
             'teachers' => TeacherResource::collection($this->whenLoaded('teachers')),
             'students' => StudentResource::collection($this->whenLoaded('students')),
             'classes' => SchoolClassResource::collection($this->whenLoaded('classes')),
+            'subjects' => SubjectResource::collection($this->whenLoaded('subjects')),
         ];
     }
 }

@@ -5,11 +5,13 @@ namespace App\Models;
 use App\Enums\Gender;
 use Database\Factories\StudentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * @property string $id
@@ -38,6 +40,28 @@ class Student extends Model
 {
     /** @use HasFactory<StudentFactory> */
     use HasFactory, HasUuids;
+
+    /**
+     * @return Attribute<string, string>
+     */
+    protected function firstName(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value): string => Str::title($value),
+            set: fn (string $value): string => Str::squish($value),
+        );
+    }
+
+    /**
+     * @return Attribute<string, string>
+     */
+    protected function lastName(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value): string => Str::title($value),
+            set: fn (string $value): string => Str::squish($value),
+        );
+    }
 
     /**
      * @return array<string, string>

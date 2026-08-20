@@ -8,6 +8,7 @@ use App\Models\Client;
 use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\Student;
+use App\Models\Subject;
 use App\Models\Teacher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -80,5 +81,62 @@ class TeacherStudentTest extends TestCase
         $this->assertTrue($teacher->classes->contains($class));
         $this->assertTrue($student->schoolClass->is($class));
         $this->assertTrue($class->students->contains($student));
+    }
+
+    public function test_a_subject_belongs_to_a_school(): void
+    {
+        $school = School::factory()->create();
+        $subject = Subject::factory()->create([
+            'school_id' => $school->id,
+            'name' => 'Mathematics',
+        ]);
+
+        $this->assertTrue(Str::isUuid($subject->id));
+        $this->assertTrue($subject->school->is($school));
+        $this->assertTrue($school->subjects->contains($subject));
+    }
+
+    public function test_a_subject_name_is_normalized_when_set_and_capitalized_when_read(): void
+    {
+        $subject = Subject::factory()->create([
+            'name' => '  english language  ',
+        ]);
+
+        $this->assertSame('english language', $subject->getRawOriginal('name'));
+        $this->assertSame('English Language', $subject->name);
+    }
+
+    public function test_a_client_name_is_normalized_when_set_and_title_cased_when_read(): void
+    {
+        $client = Client::factory()->create([
+            'name' => '  ama owner  ',
+        ]);
+
+        $this->assertSame('ama owner', $client->getRawOriginal('name'));
+        $this->assertSame('Ama Owner', $client->name);
+    }
+
+    public function test_a_student_name_is_normalized_when_set_and_title_cased_when_read(): void
+    {
+        $student = Student::factory()->create([
+            'first_name' => '  akosua  ',
+            'last_name' => '  boateng mensah  ',
+        ]);
+
+        $this->assertSame('akosua', $student->getRawOriginal('first_name'));
+        $this->assertSame('boateng mensah', $student->getRawOriginal('last_name'));
+        $this->assertSame('Akosua', $student->first_name);
+        $this->assertSame('Boateng Mensah', $student->last_name);
+    }
+
+    public function test_a_school_class_alias_is_normalized_when_set_and_title_cased_when_read(): void
+    {
+        $class = SchoolClass::factory()->create([
+            'alias' => '  form one  ',
+        ]);
+
+        $this->assertSame('form one', $class->getRawOriginal('alias'));
+        $this->assertSame('Form One', $class->alias);
+        $this->assertNull(SchoolClass::factory()->create(['alias' => null])->alias);
     }
 }

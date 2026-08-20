@@ -7,6 +7,7 @@ use App\Notifications\ResetClientPassword;
 use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -31,6 +33,17 @@ class Client extends Authenticatable
 {
     /** @use HasFactory<ClientFactory> */
     use HasApiTokens, HasFactory, HasUuids, Notifiable;
+
+    /**
+     * @return Attribute<string, string>
+     */
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value): string => Str::title($value),
+            set: fn (string $value): string => Str::squish($value),
+        );
+    }
 
     /**
      * @return array<string, string>

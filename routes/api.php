@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Auth\Profile\UpdateStudentController;
 use App\Http\Controllers\Api\Auth\Profile\UpdateTeacherController;
 use App\Http\Controllers\Api\Auth\RegisteredClientController;
 use App\Http\Controllers\Api\SchoolClass\SchoolClassController;
+use App\Http\Controllers\Api\Subject\SubjectController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/sign-up', [RegisteredClientController::class, 'store'])
@@ -54,5 +55,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/', [SchoolClassController::class, 'store'])
             ->name('api.schools.classes.store');
+    });
+
+    Route::prefix('schools/{school}/subjects')->middleware('abilities:permit:owner')->group(function () {
+        Route::get('/', [SubjectController::class, 'index'])
+            ->name('api.schools.subjects.index');
+
+        Route::post('/', [SubjectController::class, 'store'])
+            ->name('api.schools.subjects.store');
     });
 });
