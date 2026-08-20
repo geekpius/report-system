@@ -2,16 +2,14 @@
 
 namespace App\Http\Requests\Api\Auth;
 
-use App\Concerns\PasswordValidationRules;
 use App\Models\Client;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class SignUpRequest extends FormRequest
 {
-    use PasswordValidationRules;
-
     /**
      * Determine if the client is authorized to make this request.
      */
@@ -28,7 +26,15 @@ class SignUpRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(Client::class)],
-            'password' => $this->passwordRules(),
+            'password' => [
+                'required',
+                'string',
+                Password::min(8)
+                    ->mixedCase()
+                    ->letters()
+                    ->numbers()
+                    ->symbols(),
+            ],
             'address' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:255'],
         ];

@@ -19,8 +19,7 @@ class AuthenticationTest extends TestCase
         $response = $this->postJson(route('api.auth.sign-up'), [
             'name' => 'Ama Owner',
             'email' => 'ama@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Password1!',
             'address' => '12 Ridge Street',
             'phone' => '0240000000',
         ]);
@@ -40,8 +39,8 @@ class AuthenticationTest extends TestCase
 
         $client = Client::query()->where('email', 'ama@example.com')->first();
 
-        $this->assertTrue(Hash::check('password', $client->password));
-        $this->assertNotSame('password', $client->getRawOriginal('password'));
+        $this->assertTrue(Hash::check('Password1!', $client->password));
+        $this->assertNotSame('Password1!', $client->getRawOriginal('password'));
         $this->assertGuest();
 
         $this->withToken($response->json('token'))
@@ -57,8 +56,7 @@ class AuthenticationTest extends TestCase
         $this->postJson(route('api.auth.sign-up'), [
             'name' => 'Ama Owner',
             'email' => 'ama@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Password1!',
             'address' => '12 Ridge Street',
             'phone' => '0240000000',
         ])->assertUnprocessable()
@@ -70,8 +68,7 @@ class AuthenticationTest extends TestCase
         $this->postJson(route('api.auth.sign-up'), [
             'name' => 'Ama Owner',
             'email' => 'ama@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Password1!',
             'address' => '12 Ridge Street',
             'phone' => '0240000000',
             'role' => Role::Teacher->value,
@@ -82,6 +79,18 @@ class AuthenticationTest extends TestCase
             'email' => 'ama@example.com',
             'role' => Role::Owner->value,
         ]);
+    }
+
+    public function test_clients_cannot_sign_up_with_a_weak_password(): void
+    {
+        $this->postJson(route('api.auth.sign-up'), [
+            'name' => 'Ama Owner',
+            'email' => 'ama@example.com',
+            'password' => 'password',
+            'address' => '12 Ridge Street',
+            'phone' => '0240000000',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors(['password']);
     }
 
     public function test_clients_can_authenticate_via_the_api(): void
