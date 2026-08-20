@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Api\Auth\Profile\UpdateSchoolController;
 use App\Http\Controllers\Api\Auth\RegisteredClientController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,9 +14,17 @@ Route::post('/auth/login', [AuthenticatedSessionController::class, 'store'])
     ->name('api.auth.login');
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/auth/me', [AuthenticatedSessionController::class, 'show'])
-        ->name('api.auth.me');
+    // auth routes
+    Route::prefix('auth')->group(function () {
+        Route::get('/me', [AuthenticatedSessionController::class, 'show'])
+            ->name('api.me');
 
-    Route::post('/auth/logout', [AuthenticatedSessionController::class, 'destroy'])
-        ->name('api.auth.logout');
+        Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+            ->name('api.logout');
+
+        // profile routes
+        Route::put('/profile/schools/{school}', [UpdateSchoolController::class, 'update'])
+            ->middleware('abilities:permit:owner')
+            ->name('api.profile.schools.update');
+    });
 });

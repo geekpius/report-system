@@ -73,6 +73,7 @@ class AppServiceProvider extends ServiceProvider
                 $retryAfter = (int) ($headers['Retry-After'] ?? 60);
 
                 return response()->json([
+                    'success' => false,
                     'message' => __('auth.throttle', [
                         'seconds' => $retryAfter,
                         'minutes' => (int) ceil($retryAfter / 60),

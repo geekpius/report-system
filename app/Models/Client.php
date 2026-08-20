@@ -6,6 +6,7 @@ use App\Enums\Role;
 use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -14,7 +15,7 @@ use Illuminate\Support\Carbon;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
- * @property int $id
+ * @property string $id
  * @property string $name
  * @property string $email
  * @property string $password
@@ -27,7 +28,7 @@ use Laravel\Sanctum\HasApiTokens;
 class Client extends Authenticatable
 {
     /** @use HasFactory<ClientFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, HasUuids, Notifiable;
 
     /**
      * @return array<string, string>

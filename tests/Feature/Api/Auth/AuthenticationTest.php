@@ -8,6 +8,7 @@ use App\Models\School;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -25,13 +26,14 @@ class AuthenticationTest extends TestCase
         ]);
 
         $response->assertCreated()
-            ->assertJsonPath('token_type', 'Bearer')
-            ->assertJsonPath('client.email', 'ama@example.com')
-            ->assertJsonPath('client.role', Role::Owner->value)
-            ->assertJsonMissingPath('client.password')
-            ->assertJsonPath('client.schools.0.phone', '0240000000');
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.token_type', 'Bearer')
+            ->assertJsonPath('data.client.email', 'ama@example.com')
+            ->assertJsonPath('data.client.role', Role::Owner->value)
+            ->assertJsonMissingPath('data.client.password')
+            ->assertJsonPath('data.client.schools.0.phone', '0240000000');
 
-        $this->assertNotEmpty($response->json('token'));
+        $this->assertNotEmpty($response->json('data.token'));
         $this->assertDatabaseHas('clients', [
             'email' => 'ama@example.com',
             'role' => Role::Owner->value,
@@ -43,10 +45,11 @@ class AuthenticationTest extends TestCase
         $this->assertNotSame('Password1!', $client->getRawOriginal('password'));
         $this->assertGuest();
 
-        $this->withToken($response->json('token'))
-            ->getJson(route('api.auth.me'))
+        $this->withToken($response->json('data.token'))
+            ->getJson(route('api.me'))
             ->assertOk()
-            ->assertJsonPath('email', 'ama@example.com');
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.email', 'ama@example.com');
     }
 
     public function test_clients_cannot_sign_up_with_a_duplicate_email(): void
@@ -73,7 +76,7 @@ class AuthenticationTest extends TestCase
             'phone' => '0240000000',
             'role' => Role::Teacher->value,
         ])->assertCreated()
-            ->assertJsonPath('client.role', Role::Owner->value);
+            ->assertJsonPath('data.client.role', Role::Owner->value);
 
         $this->assertDatabaseHas('clients', [
             'email' => 'ama@example.com',
@@ -103,12 +106,13 @@ class AuthenticationTest extends TestCase
         ]);
 
         $response->assertOk()
-            ->assertJsonPath('token_type', 'Bearer')
-            ->assertJsonPath('client.id', $client->id)
-            ->assertJsonPath('client.role', Role::Owner->value)
-            ->assertJsonMissingPath('client.password');
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.token_type', 'Bearer')
+            ->assertJsonPath('data.client.id', $client->id)
+            ->assertJsonPath('data.client.role', Role::Owner->value)
+            ->assertJsonMissingPath('data.client.password');
 
-        $this->assertNotEmpty($response->json('token'));
+        $this->assertNotEmpty($response->json('data.token'));
         $this->assertGuest();
     }
 
@@ -120,6 +124,7 @@ class AuthenticationTest extends TestCase
             'email' => $client->email,
             'password' => 'wrong-password',
         ])->assertUnauthorized()
+            ->assertJsonPath('success', false)
             ->assertJsonPath('message', __('auth.failed'));
 
         $this->assertGuest();
@@ -131,11 +136,12 @@ class AuthenticationTest extends TestCase
         $token = $client->createToken('api')->plainTextToken;
 
         $this->withToken($token)
-            ->getJson(route('api.auth.me'))
+            ->getJson(route('api.me'))
             ->assertOk()
-            ->assertJsonPath('id', $client->id)
-            ->assertJsonPath('role', Role::Teacher->value)
-            ->assertJsonMissingPath('password');
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.id', $client->id)
+            ->assertJsonPath('data.role', Role::Teacher->value)
+            ->assertJsonMissingPath('data.password');
     }
 
     public function test_clients_can_logout_and_revoke_the_current_token(): void
@@ -144,8 +150,9 @@ class AuthenticationTest extends TestCase
         $token = $client->createToken('api')->plainTextToken;
 
         $this->withToken($token)
-            ->postJson(route('api.auth.logout'))
-            ->assertNoContent();
+            ->postJson(route('api.logout'))
+            ->assertOk()
+            ->assertJsonPath('success', true);
 
         $this->assertDatabaseCount('personal_access_tokens', 0);
 
@@ -153,7 +160,7 @@ class AuthenticationTest extends TestCase
         $this->app['auth']->forgetGuards();
 
         $this->withToken($token)
-            ->getJson(route('api.auth.me'))
+            ->getJson(route('api.me'))
             ->assertUnauthorized();
     }
 
@@ -162,7 +169,7 @@ class AuthenticationTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->getJson(route('api.auth.me'))
+            ->getJson(route('api.me'))
             ->assertUnauthorized();
     }
 
@@ -174,6 +181,9 @@ class AuthenticationTest extends TestCase
             'phone' => '0240000000',
         ]);
 
+        $this->assertTrue(Str::isUuid($owner->id));
+        $this->assertTrue(Str::isUuid($school->id));
+        $this->assertSame($owner->id, $school->owner_id);
         $this->assertTrue($school->owner->is($owner));
         $this->assertTrue($owner->schools->contains($school));
     }
@@ -197,6 +207,7 @@ class AuthenticationTest extends TestCase
         $retryAfter = (int) $response->headers->get('Retry-After');
 
         $response->assertTooManyRequests()
+            ->assertJsonPath('success', false)
             ->assertJsonPath('message', __('auth.throttle', [
                 'seconds' => $retryAfter,
                 'minutes' => (int) ceil($retryAfter / 60),

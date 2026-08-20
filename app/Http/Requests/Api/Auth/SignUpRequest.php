@@ -35,6 +35,7 @@ class SignUpRequest extends FormRequest
                     ->numbers()
                     ->symbols(),
             ],
+            "schoolName" => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:255'],
         ];

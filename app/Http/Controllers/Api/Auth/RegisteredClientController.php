@@ -25,7 +25,7 @@ class RegisteredClientController extends Controller
         ]);
 
         School::create([
-            'name' => $request->string('name'),
+            'name' => $request->string('schoolName'),
             'address' => $request->string('address'),
             'phone' => $request->string('phone'),
             'owner_id' => $client->id,
@@ -42,10 +42,10 @@ class RegisteredClientController extends Controller
 
         $client->load('schools');
 
-        return response()->json([
+        return $this->success([
             'token' => $token,
             'token_type' => 'Bearer',
             'client' => ClientResource::make($client)->resolve(),
-        ], 201);
+        ], 'Registered successfully.', 201);
     }
 }

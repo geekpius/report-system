@@ -8,7 +8,6 @@ use App\Http\Resources\ClientResource;
 use App\Models\Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -22,9 +21,7 @@ class AuthenticatedSessionController extends Controller
         $client = Client::query()->where('email', $request->string('email'))->first();
 
         if (! $client || ! Hash::check($request->string('password'), $client->password)) {
-            return response()->json([
-                'message' => __('auth.failed'),
-            ], 401);
+            return $this->error(__('auth.failed'), 401);
         }
 
         $tokenName = 'api-'.$client->role->value;
@@ -38,11 +35,11 @@ class AuthenticatedSessionController extends Controller
 
         $client->load('schools');
 
-        return response()->json([
+        return $this->success([
             'token' => $token,
             'token_type' => 'Bearer',
             'client' => ClientResource::make($client)->resolve(),
-        ]);
+        ], 'Logged in successfully.');
     }
 
     /**
@@ -52,13 +49,16 @@ class AuthenticatedSessionController extends Controller
     {
         $client = $request->user()->load('schools');
 
-        return response()->json(ClientResource::make($client)->resolve());
+        return $this->success(
+            ClientResource::make($client),
+            'Client retrieved successfully.',
+        );
     }
 
     /**
      * Revoke the current client token.
      */
-    public function destroy(Request $request): Response
+    public function destroy(Request $request): JsonResponse
     {
         $token = $request->user()->currentAccessToken();
 
@@ -66,6 +66,6 @@ class AuthenticatedSessionController extends Controller
             $token->delete();
         }
 
-        return response()->noContent();
+        return $this->success(message: 'Logged out successfully.');
     }
 }
