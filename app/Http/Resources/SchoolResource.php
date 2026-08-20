@@ -26,6 +26,9 @@ class SchoolResource extends JsonResource
             'email' => $this->email,
             'ownerId' => $this->owner_id,
             'owner' => new ClientResource($this->whenLoaded('owner')),
+            'teachers' => TeacherResource::collection($this->whenLoaded('teachers')),
+            'students' => StudentResource::collection($this->whenLoaded('students')),
+            'classes' => SchoolClassResource::collection($this->whenLoaded('classes')),
         ];
     }
 }

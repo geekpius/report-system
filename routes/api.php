@@ -3,7 +3,10 @@
 use App\Http\Controllers\Api\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\Auth\Profile\UpdateSchoolController;
+use App\Http\Controllers\Api\Auth\Profile\UpdateStudentController;
+use App\Http\Controllers\Api\Auth\Profile\UpdateTeacherController;
 use App\Http\Controllers\Api\Auth\RegisteredClientController;
+use App\Http\Controllers\Api\SchoolClass\SchoolClassController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/sign-up', [RegisteredClientController::class, 'store'])
@@ -35,5 +38,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/profile/schools/{school}', [UpdateSchoolController::class, 'update'])
             ->middleware('abilities:permit:owner')
             ->name('api.profile.schools.update');
+
+        Route::put('/profile/teachers/{teacher}', [UpdateTeacherController::class, 'update'])
+            ->middleware('abilities:permit:teacher')
+            ->name('api.profile.teachers.update');
+
+        Route::put('/profile/students/{student}', [UpdateStudentController::class, 'update'])
+            ->middleware('abilities:permit:student')
+            ->name('api.profile.students.update');
+    });
+
+    Route::prefix('schools/{school}/classes')->middleware('abilities:permit:owner')->group(function () {
+        Route::get('/', [SchoolClassController::class, 'index'])
+            ->name('api.schools.classes.index');
+
+        Route::post('/', [SchoolClassController::class, 'store'])
+            ->name('api.schools.classes.store');
     });
 });

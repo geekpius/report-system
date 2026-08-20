@@ -1,18 +1,17 @@
 <?php
 
-namespace App\Http\Requests\Api\Auth\Profile;
+namespace App\Http\Requests\Api\SchoolClass;
 
 use App\Enums\Role;
 use App\Models\Client;
 use App\Models\School;
+use App\Models\Teacher;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class UpdateSchoolRequest extends FormRequest
+class StoreSchoolClassRequest extends FormRequest
 {
-    /**
-     * Determine if the client is authorized to update this school.
-     */
     public function authorize(): bool
     {
         $client = $this->user();
@@ -29,13 +28,16 @@ class UpdateSchoolRequest extends FormRequest
      */
     public function rules(): array
     {
+        $school = $this->route('school');
+
         return [
             'name' => ['required', 'string', 'max:255'],
-            'address' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:255'],
-            'imageUrl' => ['nullable', 'string', 'max:255'],
-            'motto' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'string', 'email', 'max:255'],
+            'alias' => ['nullable', 'string', 'max:255'],
+            'classTeacherId' => [
+                'nullable',
+                'uuid',
+                Rule::exists(Teacher::class, 'id')->where('school_id', $school->id),
+            ],
         ];
     }
 }

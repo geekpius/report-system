@@ -15,7 +15,7 @@ class UpdateSchoolController extends Controller
      */
     public function update(UpdateSchoolRequest $request, School $school): JsonResponse
     {
-        $school->update($request->validated());
+        $school->update(snake_keys($request->validated()));
 
         return $this->success(
             SchoolResource::make($school),

@@ -28,7 +28,7 @@ class UpdateSchoolTest extends TestCase
                 'phone' => '0241111111',
                 'motto' => 'Learn well',
                 'email' => 'office@ridge.edu.gh',
-                'image_url' => 'https://example.com/logo.png',
+                'imageUrl' => 'https://example.com/logo.png',
             ])
             ->assertOk()
             ->assertJsonPath('success', true)

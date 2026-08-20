@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -34,5 +35,29 @@ class School extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'owner_id');
+    }
+
+    /**
+     * @return HasMany<Teacher, $this>
+     */
+    public function teachers(): HasMany
+    {
+        return $this->hasMany(Teacher::class);
+    }
+
+    /**
+     * @return HasMany<Student, $this>
+     */
+    public function students(): HasMany
+    {
+        return $this->hasMany(Student::class);
+    }
+
+    /**
+     * @return HasMany<SchoolClass, $this>
+     */
+    public function classes(): HasMany
+    {
+        return $this->hasMany(SchoolClass::class);
     }
 }
