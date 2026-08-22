@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
@@ -61,5 +60,21 @@ class SchoolClass extends Model
     public function students(): HasMany
     {
         return $this->hasMany(Student::class);
+    }
+
+    /**
+     * @return HasMany<ClassSubjectTeacher, $this>
+     */
+    public function teacherAssignments(): HasMany
+    {
+        return $this->hasMany(ClassSubjectTeacher::class);
+    }
+
+    /**
+     * @return HasMany<ClassSubject, $this>
+     */
+    public function classSubjects(): HasMany
+    {
+        return $this->hasMany(ClassSubject::class);
     }
 }

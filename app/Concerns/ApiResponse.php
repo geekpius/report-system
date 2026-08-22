@@ -35,10 +35,15 @@ trait ApiResponse
             $data = $data->resolve();
         }
 
-        return response()->json([
+        $payload = [
             'success' => true,
             'message' => $message,
-            'data' => $data,
-        ], $status, $headers);
+        ];
+
+        if ($data !== null) {
+            $payload['data'] = $data;
+        }
+
+        return response()->json($payload, $status, $headers);
     }
 }

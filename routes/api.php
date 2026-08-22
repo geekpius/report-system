@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\Auth\Profile\UpdateSchoolController;
 use App\Http\Controllers\Api\Auth\Profile\UpdateStudentController;
 use App\Http\Controllers\Api\Auth\Profile\UpdateTeacherController;
 use App\Http\Controllers\Api\Auth\RegisteredClientController;
+use App\Http\Controllers\Api\ClassSubject\ClassSubjectController;
+use App\Http\Controllers\Api\ClassSubjectTeacher\ClassSubjectTeacherController;
 use App\Http\Controllers\Api\SchoolClass\SchoolClassController;
 use App\Http\Controllers\Api\Subject\SubjectController;
 use Illuminate\Support\Facades\Route;
@@ -55,6 +57,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/', [SchoolClassController::class, 'store'])
             ->name('api.schools.classes.store');
+
+        Route::prefix('{schoolClass}/subjects')->group(function () {
+            Route::get('/', [ClassSubjectController::class, 'index'])
+                ->name('api.schools.classes.subjects.index');
+
+            Route::post('/', [ClassSubjectController::class, 'store'])
+                ->name('api.schools.classes.subjects.store');
+        });
     });
 
     Route::prefix('schools/{school}/subjects')->middleware('abilities:permit:owner')->group(function () {
@@ -63,5 +73,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/', [SubjectController::class, 'store'])
             ->name('api.schools.subjects.store');
+    });
+
+    Route::prefix('schools/{school}/class-subject-teachers')->middleware('abilities:permit:owner')->group(function () {
+        Route::get('/', [ClassSubjectTeacherController::class, 'index'])
+            ->name('api.schools.class-subject-teachers.index');
+
+        Route::post('/', [ClassSubjectTeacherController::class, 'store'])
+            ->name('api.schools.class-subject-teachers.store');
     });
 });

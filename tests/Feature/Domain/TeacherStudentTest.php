@@ -4,6 +4,8 @@ namespace Tests\Feature\Domain;
 
 use App\Enums\Gender;
 use App\Enums\Role;
+use App\Models\ClassSubject;
+use App\Models\ClassSubjectTeacher;
 use App\Models\Client;
 use App\Models\School;
 use App\Models\SchoolClass;
@@ -138,5 +140,46 @@ class TeacherStudentTest extends TestCase
         $this->assertSame('form one', $class->getRawOriginal('alias'));
         $this->assertSame('Form One', $class->alias);
         $this->assertNull(SchoolClass::factory()->create(['alias' => null])->alias);
+    }
+
+    public function test_a_class_subject_teacher_links_a_teacher_subject_and_class(): void
+    {
+        $school = School::factory()->create();
+        $class = SchoolClass::factory()->create(['school_id' => $school->id, 'name' => 'JHS 1A']);
+        $subject = Subject::factory()->create(['school_id' => $school->id, 'name' => 'Mathematics']);
+        $teacher = Teacher::factory()->create(['school_id' => $school->id]);
+        $assignment = ClassSubjectTeacher::factory()->create([
+            'school_class_id' => $class->id,
+            'subject_id' => $subject->id,
+            'teacher_id' => $teacher->id,
+        ]);
+
+        $this->assertTrue(Str::isUuid($assignment->id));
+        $this->assertTrue($assignment->schoolClass->is($class));
+        $this->assertTrue($assignment->subject->is($subject));
+        $this->assertTrue($assignment->teacher->is($teacher));
+        $this->assertTrue($class->teacherAssignments->contains($assignment));
+        $this->assertTrue($subject->teacherAssignments->contains($assignment));
+        $this->assertTrue($teacher->subjectAssignments->contains($assignment));
+        $this->assertTrue($school->classSubjectTeachers->contains($assignment));
+    }
+
+    public function test_a_class_subject_links_a_subject_to_a_class_menu(): void
+    {
+        $school = School::factory()->create();
+        $class = SchoolClass::factory()->create(['school_id' => $school->id, 'name' => 'JHS 1A']);
+        $subject = Subject::factory()->create(['school_id' => $school->id, 'name' => 'Mathematics']);
+        $classSubject = ClassSubject::factory()->create([
+            'school_class_id' => $class->id,
+            'subject_id' => $subject->id,
+            'is_mandatory' => true,
+        ]);
+
+        $this->assertTrue(Str::isUuid($classSubject->id));
+        $this->assertTrue($classSubject->schoolClass->is($class));
+        $this->assertTrue($classSubject->subject->is($subject));
+        $this->assertTrue($class->classSubjects->contains($classSubject));
+        $this->assertTrue($subject->classSubjects->contains($classSubject));
+        $this->assertTrue($classSubject->is_mandatory);
     }
 }

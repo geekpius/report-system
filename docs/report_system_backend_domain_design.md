@@ -176,6 +176,19 @@ Because `class` can conflict with PHP/Laravel terminology, use
 These tables handle relationships between teachers, classes, subjects,
 and students.
 
+Optional subjects and class promotion are modeled in three layers:
+
+1. **`class_subjects`** — subject menu for a class (mandatory vs elective)
+2. **`student_class_enrollments`** — time-bounded class history per academic year
+3. **`student_subjects`** — subjects a student actually takes during a class stint
+
+Marks, report cards, and positions should only be created for subjects
+listed in `student_subjects`, not inferred from `class_subjects` alone.
+
+`students.school_class_id` remains a cached **current class** for fast
+reads. Historical class and subject data lives in the enrollment and
+student-subject tables.
+
 ------------------------------------------------------------------------
 
 ## 2.1 Teacher ↔ Class ↔ Subject
@@ -203,7 +216,8 @@ This table answers:
 
 ## 2.2 Class ↔ Subject
 
-This determines which subjects a class learns.
+This determines which subjects a class **offers**. Not every offered
+subject is taken by every student — see §2.4.
 
 ### `class_subjects`
 
@@ -212,66 +226,128 @@ This determines which subjects a class learns.
   `id`                Primary key
   `school_class_id`   Foreign key to `school_classes.id`
   `subject_id`        Foreign key to `subjects.id`
+  `is_mandatory`      Whether every student in the class must take this subject (default `true`)
   `created_at`        Creation timestamp
   `updated_at`        Update timestamp
+
+Unique constraint: `(school_class_id, subject_id)`
+
+**Mandatory vs elective**
+
+- `is_mandatory = true` — core subject; auto-provisioned into
+  `student_subjects` when a student is placed in the class
+- `is_mandatory = false` — elective/optional; a `student_subjects` row is
+  created only when the student (or owner) selects it
 
 Example:
 
 ``` text
-JHS 1A
- ├── Mathematics
- ├── English
- ├── Science
- └── ICT
+JHS 1A (class menu)
+ ├── Mathematics   (mandatory)
+ ├── English       (mandatory)
+ ├── Science       (mandatory)
+ ├── French        (elective)
+ └── ICT           (elective)
+```
+
+When John and Mary are both in JHS 1A, they share the mandatory subjects
+but may differ on electives:
+
+``` text
+John  → Mathematics, English, Science, French
+Mary  → Mathematics, English, Science, ICT
 ```
 
 ------------------------------------------------------------------------
 
 ## 2.3 Student ↔ Class
 
-For the initial implementation, a student belongs to one current class.
+A student has one **current** class via `students.school_class_id`. This
+is a denormalized snapshot for profile reads and simple queries.
 
-This can be represented directly in the `students` table:
-
-``` text
-students.school_class_id
-```
-
-However, if you want to support class promotion/history later, it is
-better to introduce a separate enrollment/history table.
-
-For example:
+Class **history** and promotion are tracked in `student_class_enrollments`.
 
 ### `student_class_enrollments`
 
   Field                Description
-  -------------------- --------------------
+  -------------------- ------------------------------------------
   `id`                 Primary key
-  `student_id`         Student
-  `school_class_id`    Class
-  `academic_year_id`   Academic year
+  `student_id`         Foreign key to `students.id`
+  `school_class_id`    Foreign key to `school_classes.id`
+  `academic_year_id`   Foreign key to `academic_years.id`
+  `status`             `active`, `promoted`, `transferred`, or `withdrawn`
+  `started_at`         When the student entered this class
+  `ended_at`           When the stint ended; `null` while active
   `created_at`         Creation timestamp
   `updated_at`         Update timestamp
 
-This approach is recommended for a production school system because
-students move from one class to another over time.
+Unique constraint: `(student_id, academic_year_id)` — one class per student
+per academic year (adjust if mid-year transfers are supported later).
+
+**Initial implementation**
+
+Create one active enrollment whenever `students.school_class_id` is set.
+Promotion UI can be added later without changing the schema.
+
+**Promotion flow (future)**
+
+``` text
+1. Close the active enrollment (status=promoted, ended_at=now)
+2. Create a new enrollment for the next class and academic year
+3. Update students.school_class_id
+4. Mark old student_subjects rows status=completed (do not delete)
+5. Auto-create mandatory student_subjects for the new class enrollment
+6. Re-select electives from the new class menu as needed
+```
+
+Historical report cards query by `student_class_enrollment_id` and term,
+not by the student's current `school_class_id`.
 
 ------------------------------------------------------------------------
 
 ## 2.4 Student ↔ Subject
 
-This determines which subjects a student takes.
+This is the source of truth for **which subjects a student actually
+takes** during a class stint. It is separate from the class subject menu
+in `class_subjects`.
 
 ### `student_subjects`
 
-  Field               Description
-  ------------------- -------------------------------------
-  `id`                Primary key
-  `student_id`        Foreign key to `students.id`
-  `subject_id`        Foreign key to `subjects.id`
-  `school_class_id`   Class in which the subject is taken
-  `created_at`        Creation timestamp
-  `updated_at`        Update timestamp
+  Field                          Description
+  ------------------------------ ---------------------------------------------
+  `id`                           Primary key
+  `student_id`                   Foreign key to `students.id`
+  `subject_id`                   Foreign key to `subjects.id`
+  `school_class_id`              Class in which the subject is taken (denormalized context)
+  `student_class_enrollment_id`  Foreign key to `student_class_enrollments.id`
+  `status`                       `active`, `dropped`, or `completed` (default `active`)
+  `created_at`                   Creation timestamp
+  `updated_at`                   Update timestamp
+
+Unique constraint: `(student_class_enrollment_id, subject_id)`
+
+Before enrollments are implemented, use
+`(student_id, school_class_id, subject_id)` as a temporary unique key.
+
+**How rows are created**
+
+1. Owner assigns subjects to the class via `class_subjects`.
+2. When a student is placed in a class, create `student_subjects` for all
+   mandatory class subjects automatically.
+3. Create additional rows only for electives the student selects.
+4. No row for an elective means the student does not take that subject.
+
+**Validation rules**
+
+- `subject_id` must exist in `class_subjects` for the student's class
+- electives cannot be added unless offered on the class menu
+- mandatory subjects cannot be dropped without an admin override (optional policy)
+
+**Promotion**
+
+Do not delete `student_subjects` when a student is promoted. Set
+`status=completed` on the old enrollment's rows and create new rows linked
+to the new `student_class_enrollment_id`.
 
 ------------------------------------------------------------------------
 
@@ -284,17 +360,22 @@ and term.
 
 ### `marks`
 
-  Field               Description
-  ------------------- -----------------------------------
-  `id`                Primary key
-  `student_id`        Student
-  `subject_id`        Subject
-  `school_class_id`   Class
-  `term`              Term 1, 2, or 3
-  `score`             Score, e.g. 0--100
-  `teacher_id`        Teacher who entered/owns the mark
-  `created_at`        Creation timestamp
-  `updated_at`        Update timestamp
+  Field                          Description
+  ------------------------------ -----------------------------------
+  `id`                           Primary key
+  `student_id`                   Student
+  `subject_id`                   Subject
+  `school_class_id`              Class
+  `student_class_enrollment_id`  Class stint this mark belongs to
+  `academic_year_id`             Academic year (optional but recommended)
+  `term`                         Term 1, 2, or 3
+  `score`                        Score, e.g. 0--100
+  `teacher_id`                   Teacher who entered/owns the mark
+  `created_at`                   Creation timestamp
+  `updated_at`                   Update timestamp
+
+A mark may only be created when a matching **active** `student_subjects`
+row exists for the same enrollment, student, and subject.
 
 Example:
 
@@ -389,6 +470,7 @@ Teacher: Mr. Mensah
   Subject               `subjects`
   ClassSubject          `class_subjects`
   ClassSubjectTeacher   `class_subject_teachers`
+  StudentClassEnrollment   `student_class_enrollments`
   StudentSubject        `student_subjects`
   Mark                  `marks`
   Aggregate             `aggregates`
@@ -399,7 +481,6 @@ Recommended additional model for future-proofing:
   Model                    Table
   ------------------------ -----------------------------
   AcademicYear             `academic_years`
-  StudentClassEnrollment   `student_class_enrollments`
 
 ------------------------------------------------------------------------
 
@@ -469,7 +550,7 @@ class SchoolClass extends Model
         return $this->belongsToMany(
             Subject::class,
             'class_subjects'
-        );
+        )->withPivot('is_mandatory');
     }
 
     public function teacherAssignments()
@@ -533,12 +614,21 @@ class Student extends Model
         return $this->belongsTo(SchoolClass::class);
     }
 
+    public function classEnrollments()
+    {
+        return $this->hasMany(StudentClassEnrollment::class);
+    }
+
     public function subjects()
     {
         return $this->belongsToMany(
             Subject::class,
             'student_subjects'
-        )->withPivot('school_class_id');
+        )->withPivot([
+            'school_class_id',
+            'student_class_enrollment_id',
+            'status',
+        ]);
     }
 
     public function marks()
@@ -570,7 +660,7 @@ class Subject extends Model
         return $this->belongsToMany(
             SchoolClass::class,
             'class_subjects'
-        );
+        )->withPivot('is_mandatory');
     }
 
     public function students()
@@ -578,7 +668,11 @@ class Subject extends Model
         return $this->belongsToMany(
             Student::class,
             'student_subjects'
-        )->withPivot('school_class_id');
+        )->withPivot([
+            'school_class_id',
+            'student_class_enrollment_id',
+            'status',
+        ]);
     }
 
     public function teacherAssignments()
@@ -718,11 +812,14 @@ Example:
 
 ``` text
 JHS 1A
- ├── Mathematics
- ├── English
- ├── Science
- └── ICT
+ ├── Mathematics   (mandatory)
+ ├── English       (mandatory)
+ ├── Science       (mandatory)
+ ├── French        (elective)
+ └── ICT           (elective)
 ```
+
+This defines the class subject **menu**, not every student's final subject list.
 
 ------------------------------------------------------------------------
 
@@ -774,13 +871,22 @@ JHS 1A
 ``` text
 Student
    ↓
+StudentClassEnrollment   (class stint)
+   ↓
 StudentSubject
    ↓
 Subject
 ```
 
-This allows the system to support situations where not every student
-takes exactly the same subjects.
+When a student joins a class:
+
+1. Create or update the active `student_class_enrollment`
+2. Auto-provision mandatory subjects from `class_subjects`
+3. Add elective rows only for subjects the student chooses
+
+This supports situations where students in the same class take different
+subject sets. Marks are entered only for subjects with an active
+`student_subjects` row.
 
 ------------------------------------------------------------------------
 
@@ -1168,7 +1274,10 @@ The initial model can support the following features later:
 
 -   Academic years
 -   Terms/semesters
--   Student promotion
+-   Student promotion (via `student_class_enrollments`; close enrollments
+    and subject rows instead of deleting them)
+-   Optional/elective subjects (via `class_subjects.is_mandatory` and
+    explicit `student_subjects` rows)
 -   Student transfers
 -   Report cards
 -   Class positions
@@ -1254,14 +1363,16 @@ Build the backend in this order:
 10. Class ↔ Subject
 11. Teacher ↔ Class ↔ Subject
 12. Student
-13. Student ↔ Subject
-14. Academic Year / Terms
-15. Marks
-16. Aggregate / Grading
-17. Student Remarks
-18. Results calculation
-19. Report cards
-20. Authorization hardening and testing
+13. Student class enrollments (stub: create active enrollment on class assignment)
+14. Student ↔ Subject (auto-provision mandatory; assign/remove electives)
+15. Academic Year / Terms
+16. Marks
+17. Aggregate / Grading
+18. Student Remarks
+19. Results calculation
+20. Report cards
+21. Student promotion
+22. Authorization hardening and testing
 ```
 
 This order ensures that the foundational relationships are established
@@ -1284,13 +1395,14 @@ The architecture supports:
 -   Class management
 -   Subject management
 -   Teacher-subject-class assignments
--   Student-subject assignments
+-   Student-subject assignments (mandatory auto-provision + elective selection)
+-   Class subject menus (mandatory vs elective)
 -   Marks
 -   Grading/aggregates
 -   Class teacher remarks
 -   Academic results
 -   Future report cards
--   Student promotion/history
+-   Student promotion/history (via `student_class_enrollments`)
 
 The design is normalized, scalable, and suitable for implementation with
 Laravel Eloquent.

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Carbon;
 
 /**
@@ -67,5 +68,18 @@ class School extends Model
     public function subjects(): HasMany
     {
         return $this->hasMany(Subject::class);
+    }
+
+    /**
+     * @return HasManyThrough<ClassSubjectTeacher, SchoolClass, $this>
+     */
+    public function classSubjectTeachers(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            ClassSubjectTeacher::class,
+            SchoolClass::class,
+            'school_id',
+            'school_class_id',
+        );
     }
 }
