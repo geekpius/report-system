@@ -275,7 +275,7 @@ Class **history** and promotion are tracked in `student_class_enrollments`.
   `student_id`         Foreign key to `students.id`
   `school_class_id`    Foreign key to `school_classes.id`
   `academic_year_id`   Foreign key to `academic_years.id`
-  `status`             `active`, `promoted`, `transferred`, or `withdrawn`
+  `status`             `active`, `promoted`, `transferred`, or `repeated`
   `started_at`         When the student entered this class
   `ended_at`           When the stint ended; `null` while active
   `created_at`         Creation timestamp
@@ -325,9 +325,6 @@ in `class_subjects`.
   `updated_at`                   Update timestamp
 
 Unique constraint: `(student_class_enrollment_id, subject_id)`
-
-Before enrollments are implemented, use
-`(student_id, school_class_id, subject_id)` as a temporary unique key.
 
 **How rows are created**
 

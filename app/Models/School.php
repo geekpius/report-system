@@ -82,4 +82,12 @@ class School extends Model
             'school_class_id',
         );
     }
+
+    /**
+     * @return HasMany<AcademicYear, $this>
+     */
+    public function academicYears(): HasMany
+    {
+        return $this->hasMany(AcademicYear::class);
+    }
 }

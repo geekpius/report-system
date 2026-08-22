@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
@@ -96,5 +98,29 @@ class Student extends Model
     public function schoolClass(): BelongsTo
     {
         return $this->belongsTo(SchoolClass::class);
+    }
+
+    /**
+     * @return HasMany<StudentClassEnrollment, $this>
+     */
+    public function classEnrollments(): HasMany
+    {
+        return $this->hasMany(StudentClassEnrollment::class);
+    }
+
+    /**
+     * @return HasOne<StudentClassEnrollment, $this>
+     */
+    public function activeClassEnrollment(): HasOne
+    {
+        return $this->hasOne(StudentClassEnrollment::class)->active();
+    }
+
+    /**
+     * @return HasMany<StudentSubject, $this>
+     */
+    public function studentSubjects(): HasMany
+    {
+        return $this->hasMany(StudentSubject::class);
     }
 }

@@ -60,4 +60,12 @@ class Subject extends Model
     {
         return $this->hasMany(ClassSubject::class);
     }
+
+    /**
+     * @return HasMany<StudentSubject, $this>
+     */
+    public function studentSubjects(): HasMany
+    {
+        return $this->hasMany(StudentSubject::class);
+    }
 }

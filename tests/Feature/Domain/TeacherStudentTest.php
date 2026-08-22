@@ -4,6 +4,7 @@ namespace Tests\Feature\Domain;
 
 use App\Enums\Gender;
 use App\Enums\Role;
+use App\Models\AcademicYear;
 use App\Models\ClassSubject;
 use App\Models\ClassSubjectTeacher;
 use App\Models\Client;
@@ -12,6 +13,7 @@ use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
+use App\Models\Term;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -181,5 +183,25 @@ class TeacherStudentTest extends TestCase
         $this->assertTrue($class->classSubjects->contains($classSubject));
         $this->assertTrue($subject->classSubjects->contains($classSubject));
         $this->assertTrue($classSubject->is_mandatory);
+    }
+
+    public function test_an_academic_year_belongs_to_a_school_and_has_terms(): void
+    {
+        $school = School::factory()->create();
+        $academicYear = AcademicYear::factory()->create([
+            'school_id' => $school->id,
+            'name' => '2025/2026',
+        ]);
+        $term = Term::factory()->create([
+            'academic_year_id' => $academicYear->id,
+            'name' => 'Term 1',
+            'number' => 1,
+        ]);
+
+        $this->assertTrue(Str::isUuid($academicYear->id));
+        $this->assertTrue($academicYear->school->is($school));
+        $this->assertTrue($school->academicYears->contains($academicYear));
+        $this->assertTrue($academicYear->terms->contains($term));
+        $this->assertTrue($term->academicYear->is($academicYear));
     }
 }
