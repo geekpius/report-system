@@ -90,4 +90,12 @@ class School extends Model
     {
         return $this->hasMany(AcademicYear::class);
     }
+
+    /**
+     * @return HasMany<Aggregate, $this>
+     */
+    public function aggregates(): HasMany
+    {
+        return $this->hasMany(Aggregate::class);
+    }
 }

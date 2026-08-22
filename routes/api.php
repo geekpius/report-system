@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AcademicYear\AcademicYearController;
+use App\Http\Controllers\Api\Aggregate\AggregateController;
 use App\Http\Controllers\Api\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Api\Auth\PasswordResetController;
 use App\Http\Controllers\Api\Auth\Profile\UpdateSchoolController;
@@ -105,6 +106,18 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/', [TermController::class, 'store'])
                 ->name('api.schools.academic-years.terms.store');
         });
+    });
+
+    // aggregate routes
+    Route::prefix('schools/{school}/aggregates')->middleware('abilities:permit:owner')->group(function () {
+        Route::get('/', [AggregateController::class, 'index'])
+            ->name('api.schools.aggregates.index');
+
+        Route::post('/', [AggregateController::class, 'store'])
+            ->name('api.schools.aggregates.store');
+
+        Route::put('/{aggregate}', [AggregateController::class, 'update'])
+            ->name('api.schools.aggregates.update');
     });
 
     // student class enrollment routes

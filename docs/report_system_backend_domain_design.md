@@ -352,8 +352,8 @@ to the new `student_class_enrollment_id`.
 
 ## 3.1 Marks
 
-Marks represent a student's score for a subject in a particular class
-and term.
+Marks represent a student's exam, class, and total scores for a subject
+in a particular class and term.
 
 ### `marks`
 
@@ -366,13 +366,29 @@ and term.
   `student_class_enrollment_id`  Class stint this mark belongs to
   `academic_year_id`             Academic year (optional but recommended)
   `term`                         Term 1, 2, or 3
-  `score`                        Score, e.g. 0--100
+  `exam_score`                   Exam score out of 100
+  `class_score`                  Class/continuous assessment score out of 100
+  `total_score`                  Final combined score out of 100, used for grading
+  `grade`                        Grade snapshot at entry time, e.g. A1, B2
+  `grade_remark`                 Grade remark snapshot at entry time, e.g. Excellent
   `teacher_id`                   Teacher who entered/owns the mark
   `created_at`                   Creation timestamp
   `updated_at`                   Update timestamp
 
 A mark may only be created when a matching **active** `student_subjects`
 row exists for the same enrollment, student, and subject.
+
+`exam_score` and `class_score` are each recorded on a **0--100** scale.
+`total_score` is also on a **0--100** scale. It is derived from
+`exam_score` and `class_score` using the school's weighting policy (for
+example, 70% exam + 30% class), not by adding the two raw scores
+together.
+
+When a mark is saved, the system looks up the matching row in
+`aggregates` using `total_score` and copies **`grade`** and
+**`grade_remark`** onto the mark. These values are stored on the mark
+itself so historical report cards stay correct even if the school's
+grading bands change later.
 
 Example:
 
@@ -381,8 +397,108 @@ Student: John Doe
 Class: JHS 1A
 Subject: Mathematics
 Term: 1
-Score: 82
+Exam score: 75/100
+Class score: 90/100
+Total score: 82/100
+Grade: A1
+Grade remark: Excellent
 Teacher: Mr. Mensah
+```
+
+------------------------------------------------------------------------
+
+## 3.2 Term results & class position
+
+Term results combine a student's subject marks for one class, academic
+year, and term into a single **average score** used for **class
+ranking**.
+
+Only marks linked to **active** `student_subjects` for the student's
+`student_class_enrollment_id` should be included.
+
+### `student_term_results`
+
+  Field                          Description
+  ------------------------------ ------------------------------------------
+  `id`                           Primary key
+  `student_id`                   Student
+  `school_class_id`              Class
+  `student_class_enrollment_id`  Class stint this result belongs to
+  `academic_year_id`             Academic year
+  `term_id`                      Foreign key to `terms.id`
+  `subjects_count`               Number of subject marks included
+  `total_score`                  Sum of included `marks.total_score` values
+  `average_score`                Average of included `marks.total_score` values
+  `class_position`               Rank within the class for this term (1 = best)
+  `calculated_at`                When this snapshot was last computed
+  `created_at`                   Creation timestamp
+  `updated_at`                   Update timestamp
+
+Unique constraint: `(student_class_enrollment_id, term_id)`
+
+### How `average_score` is calculated
+
+Default policy (recommended when students may take different electives):
+
+``` text
+average_score = total_score / subjects_count
+```
+
+Where:
+
+``` text
+total_score     = SUM(marks.total_score)
+subjects_count  = COUNT(marks)
+```
+
+Both sums are scoped to the same `student_class_enrollment_id`,
+`academic_year_id`, and `term_id`.
+
+`average_score` is on the same **0--100** scale as `marks.total_score`
+because it is an average of those values.
+
+Alternative policy (only when every student in the class takes the exact
+same subject set that term): rank by `total_score` instead of
+`average_score`. Document the school's choice in configuration later.
+
+### How `class_position` is calculated
+
+1. Compute `average_score` for every student in the class for the same
+   `academic_year_id` and `term_id`.
+2. Sort students by `average_score` descending (highest first).
+3. Assign `class_position` starting at 1.
+
+Suggested tie-breakers (in order):
+
+1. Higher `total_score`
+2. Stable sort by `students.admission_number`
+
+Only students with marks for all **mandatory** subjects (and any other
+required subjects defined by school policy) should receive a position.
+
+### When to recalculate
+
+Recalculate `student_term_results` when:
+
+- A mark is created, updated, or deleted for that term
+- A student's active `student_subjects` set changes for that enrollment
+- The owner explicitly republishes results for a class/term
+
+Store the computed values on `student_term_results` so report cards and
+historical rankings remain stable even if `aggregates` or individual
+marks change later.
+
+Example:
+
+``` text
+Student: John Doe
+Class: JHS 1A
+Academic year: 2025/2026
+Term: 1
+Subjects counted: 6
+Total score: 503
+Average score: 83.83
+Class position: 2
 ```
 
 ------------------------------------------------------------------------
@@ -417,10 +533,17 @@ Example:
 
 ### Finding an aggregate
 
+Use this lookup when creating or updating a mark, then persist the
+returned `grade` and `remarks` on the mark as `grade` and
+`grade_remark`:
+
 ``` php
-$aggregate = Aggregate::where('min_score', '<=', $score)
-    ->where('max_score', '>=', $score)
+$aggregate = Aggregate::where('min_score', '<=', $totalScore)
+    ->where('max_score', '>=', $totalScore)
     ->first();
+
+$mark->grade = $aggregate->grade;
+$mark->grade_remark = $aggregate->remarks;
 ```
 
 ------------------------------------------------------------------------
@@ -470,6 +593,7 @@ Teacher: Mr. Mensah
   StudentClassEnrollment   `student_class_enrollments`
   StudentSubject        `student_subjects`
   Mark                  `marks`
+  StudentTermResult     `student_term_results`
   Aggregate             `aggregates`
   StudentRemark         `student_remarks`
 
@@ -905,7 +1029,11 @@ Student: John Doe
 Class: JHS 1A
 Subject: Mathematics
 Term: 1
-Score: 82
+Exam score: 75/100
+Class score: 90/100
+Total score: 82/100
+Grade: A1
+Grade remark: Excellent
 ```
 
 ------------------------------------------------------------------------
@@ -913,23 +1041,25 @@ Score: 82
 ## Flow 11 --- Calculate grade/aggregate
 
 ``` text
-Score
+Total score
   ↓
 Aggregate grading rules
   ↓
-Grade + Remarks
+Grade + grade remark (stored on the mark)
 ```
 
 Example:
 
 ``` text
-82
+Total score: 82/100
  ↓
 80–100
  ↓
-A1
+Grade: A1
  ↓
-Excellent
+Grade remark: Excellent
+ ↓
+Saved on mark record
 ```
 
 ------------------------------------------------------------------------
@@ -1277,7 +1407,7 @@ The initial model can support the following features later:
     explicit `student_subjects` rows)
 -   Student transfers
 -   Report cards
--   Class positions
+-   Class positions (via `student_term_results`; see §3.2)
 -   Subject positions
 -   Result publishing
 -   Parent accounts
@@ -1364,12 +1494,13 @@ Build the backend in this order:
 14. Student ↔ Subject (auto-provision mandatory; assign/remove electives)
 15. Academic Year / Terms
 16. Marks
-17. Aggregate / Grading
-18. Student Remarks
-19. Results calculation
-20. Report cards
-21. Student promotion
-22. Authorization hardening and testing
+17. Term results & class position (§3.2)
+18. Aggregate / Grading
+19. Student Remarks
+20. Results calculation / publish
+21. Report cards
+22. Student promotion
+23. Authorization hardening and testing
 ```
 
 This order ensures that the foundational relationships are established
