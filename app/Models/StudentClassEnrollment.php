@@ -89,4 +89,12 @@ class StudentClassEnrollment extends Model
     {
         return $this->hasMany(StudentSubject::class);
     }
+
+    /**
+     * @return HasMany<StudentTermResult, $this>
+     */
+    public function termResults(): HasMany
+    {
+        return $this->hasMany(StudentTermResult::class);
+    }
 }

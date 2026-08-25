@@ -37,14 +37,14 @@ class Aggregate extends Model
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    public function scopeForScore(Builder $query, int $score): Builder
+    public function scopeForScore(Builder $query, float|int $score): Builder
     {
         return $query
             ->where('min_score', '<=', $score)
             ->where('max_score', '>=', $score);
     }
 
-    public static function findForScore(int $score, string $schoolId): ?self
+    public static function findForScore(float|int $score, string $schoolId): ?self
     {
         return self::query()
             ->where('school_id', $schoolId)

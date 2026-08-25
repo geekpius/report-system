@@ -10,9 +10,11 @@ use App\Http\Controllers\Api\Auth\Profile\UpdateTeacherController;
 use App\Http\Controllers\Api\Auth\RegisteredClientController;
 use App\Http\Controllers\Api\ClassSubject\ClassSubjectController;
 use App\Http\Controllers\Api\ClassSubjectTeacher\ClassSubjectTeacherController;
+use App\Http\Controllers\Api\Mark\MarkController;
 use App\Http\Controllers\Api\SchoolClass\SchoolClassController;
 use App\Http\Controllers\Api\StudentClassEnrollment\StudentClassEnrollmentController;
 use App\Http\Controllers\Api\StudentSubject\StudentSubjectController;
+use App\Http\Controllers\Api\StudentTermResult\StudentTermResultController;
 use App\Http\Controllers\Api\Subject\SubjectController;
 use App\Http\Controllers\Api\Term\TermController;
 use Illuminate\Support\Facades\Route;
@@ -118,6 +120,24 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::put('/{aggregate}', [AggregateController::class, 'update'])
             ->name('api.schools.aggregates.update');
+    });
+
+    // mark routes
+    Route::prefix('schools/{school}/marks')->middleware('abilities:permit:owner')->group(function () {
+        Route::get('/', [MarkController::class, 'index'])
+            ->name('api.schools.marks.index');
+
+        Route::post('/', [MarkController::class, 'store'])
+            ->name('api.schools.marks.store');
+
+        Route::put('/{mark}', [MarkController::class, 'update'])
+            ->name('api.schools.marks.update');
+    });
+
+    // student term result routes
+    Route::prefix('schools/{school}/student-term-results')->middleware('abilities:permit:owner')->group(function () {
+        Route::get('/', [StudentTermResultController::class, 'index'])
+            ->name('api.schools.student-term-results.index');
     });
 
     // student class enrollment routes

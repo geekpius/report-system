@@ -352,43 +352,91 @@ to the new `student_class_enrollment_id`.
 
 ## 3.1 Marks
 
-Marks represent a student's exam, class, and total scores for a subject
-in a particular class and term.
+Marks represent a student's continuous assessment, exam, and final total
+score for a subject in a particular class and term.
+
+Continuous assessment is split into **four divisions**. Each division is
+scored out of **15**. Together they form a **60-point subtotal**, which
+contributes **50%** of the final mark. The exam is entered out of
+**100** and contributes the other **50%**.
+
+### Continuous assessment divisions
+
+  Division                         Max score
+  -------------------------------- ---------
+  Class score                      15
+  Home assignments                 15
+  Project / group assignments      15
+  Class tests                      15
+  **Continuous assessment total**  **60**
+
+### Score conversion (50% + 50%)
+
+``` text
+continuous_assessment_score = class_score
+                            + home_assignment_score
+                            + project_score
+                            + class_test_score
+                            # max 60
+
+continuous_assessment_contribution = (continuous_assessment_score / 60) * 50
+exam_contribution                  = (exam_score / 100) * 50
+total_score                        = continuous_assessment_contribution
+                                   + exam_contribution
+                                     # out of 100
+```
 
 ### `marks`
 
-  Field                          Description
-  ------------------------------ -----------------------------------
-  `id`                           Primary key
-  `student_id`                   Student
-  `subject_id`                   Subject
-  `school_class_id`              Class
-  `student_class_enrollment_id`  Class stint this mark belongs to
-  `academic_year_id`             Academic year (optional but recommended)
-  `term`                         Term 1, 2, or 3
-  `exam_score`                   Exam score out of 100
-  `class_score`                  Class/continuous assessment score out of 100
-  `total_score`                  Final combined score out of 100, used for grading
-  `grade`                        Grade snapshot at entry time, e.g. A1, B2
-  `grade_remark`                 Grade remark snapshot at entry time, e.g. Excellent
-  `teacher_id`                   Teacher who entered/owns the mark
-  `created_at`                   Creation timestamp
-  `updated_at`                   Update timestamp
+  Field                               Description
+  ----------------------------------- -----------------------------------
+  `id`                                Primary key
+  `student_id`                        Student
+  `subject_id`                        Subject
+  `school_class_id`                   Class
+  `student_class_enrollment_id`       Class stint this mark belongs to
+  `academic_year_id`                  Academic year
+  `term_id`                           Foreign key to `terms.id`
+  `class_score`                       Class score out of 15
+  `home_assignment_score`             Home assignments out of 15
+  `project_score`                     Project / group assignments out of 15
+  `class_test_score`                  Class tests out of 15
+  `continuous_assessment_score`       Sum of the four divisions out of 60
+  `continuous_assessment_contribution` CA converted to 50% of final mark (0--50)
+  `exam_score`                        Exam score out of 100
+  `exam_contribution`                 Exam converted to 50% of final mark (0--50)
+  `total_score`                       Final score out of 100 (CA contribution + exam contribution)
+  `grade`                             Grade snapshot at entry time, e.g. A1, B2
+  `grade_remark`                      Grade remark snapshot at entry time, e.g. Excellent
+  `teacher_id`                        Teacher who entered/owns the mark
+  `created_at`                        Creation timestamp
+  `updated_at`                        Update timestamp
 
 A mark may only be created when a matching **active** `student_subjects`
 row exists for the same enrollment, student, and subject.
 
-`exam_score` and `class_score` are each recorded on a **0--100** scale.
-`total_score` is also on a **0--100** scale. It is derived from
-`exam_score` and `class_score` using the school's weighting policy (for
-example, 70% exam + 30% class), not by adding the two raw scores
-together.
+**Validation rules**
 
-When a mark is saved, the system looks up the matching row in
-`aggregates` using `total_score` and copies **`grade`** and
-**`grade_remark`** onto the mark. These values are stored on the mark
-itself so historical report cards stay correct even if the school's
-grading bands change later.
+- Each of `class_score`, `home_assignment_score`, `project_score`, and
+  `class_test_score` must be between **0 and 15** inclusive
+- `exam_score` must be between **0 and 100** inclusive
+- `continuous_assessment_score` is stored as the sum of the four
+  divisions (0--60) and must not exceed 60
+- `continuous_assessment_contribution`, `exam_contribution`, and
+  `total_score` are derived and stored; do not accept them as raw
+  client input
+
+When a mark is saved, the system:
+
+1. Sums the four CA divisions into `continuous_assessment_score`
+2. Converts CA into `continuous_assessment_contribution` (0--50)
+3. Converts exam into `exam_contribution` (0--50)
+4. Stores `total_score` as the sum of both contributions (0--100)
+5. Looks up the matching row in `aggregates` using `total_score`
+6. Copies **`grade`** and **`grade_remark`** onto the mark
+
+`grade` and `grade_remark` are stored on the mark so historical report
+cards stay correct even if the school's grading bands change later.
 
 Example:
 
@@ -397,12 +445,19 @@ Student: John Doe
 Class: JHS 1A
 Subject: Mathematics
 Term: 1
-Exam score: 75/100
-Class score: 90/100
-Total score: 82/100
-Grade: A1
-Grade remark: Excellent
-Teacher: Mr. Mensah
+
+Class score:                         12/15
+Home assignments:                    14/15
+Project / group work:                13/15
+Class tests:                         15/15
+Continuous assessment score:         54/60
+Continuous assessment contribution:  45.00/50
+Exam score:                          80/100
+Exam contribution:                   40.00/50
+Total score:                         85.00/100
+Grade:                               A1
+Grade remark:                        Excellent
+Teacher:                             Mr. Mensah
 ```
 
 ------------------------------------------------------------------------
@@ -1029,11 +1084,18 @@ Student: John Doe
 Class: JHS 1A
 Subject: Mathematics
 Term: 1
-Exam score: 75/100
-Class score: 90/100
-Total score: 82/100
-Grade: A1
-Grade remark: Excellent
+
+Class score:           12/15
+Home assignments:      14/15
+Project / group work:  13/15
+Class tests:           15/15
+CA score:              54/60
+CA contribution:       45.00/50
+Exam score:            80/100
+Exam contribution:     40.00/50
+Total score:           85.00/100
+Grade:                 A1
+Grade remark:          Excellent
 ```
 
 ------------------------------------------------------------------------
@@ -1041,7 +1103,14 @@ Grade remark: Excellent
 ## Flow 11 --- Calculate grade/aggregate
 
 ``` text
-Total score
+Four CA divisions (max 15 each)
+  ↓
+Continuous assessment score (max 60)
+  ↓
+Continuous assessment contribution (max 50)
++ Exam contribution (max 50)
+  ↓
+Total score (max 100)
   ↓
 Aggregate grading rules
   ↓
@@ -1051,7 +1120,9 @@ Grade + grade remark (stored on the mark)
 Example:
 
 ``` text
-Total score: 82/100
+CA score 54/60 → contribution 45.00
+Exam 80/100 → contribution 40.00
+Total score: 85.00/100
  ↓
 80–100
  ↓
