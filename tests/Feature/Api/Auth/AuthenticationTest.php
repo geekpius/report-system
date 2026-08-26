@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Auth;
 
 use App\Enums\Role;
+use App\Enums\SchoolType;
 use App\Models\Client;
 use App\Models\School;
 use App\Models\User;
@@ -21,7 +22,10 @@ class AuthenticationTest extends TestCase
             'name' => 'Ama Owner',
             'email' => 'ama@example.com',
             'password' => 'Password1!',
+            'schoolName' => 'Ridge JHS',
             'address' => '12 Ridge Street',
+            'city' => 'Accra',
+            'type' => SchoolType::Private->value,
             'phone' => '0240000000',
         ]);
 
@@ -31,7 +35,9 @@ class AuthenticationTest extends TestCase
             ->assertJsonPath('data.client.email', 'ama@example.com')
             ->assertJsonPath('data.client.role', Role::Owner->value)
             ->assertJsonMissingPath('data.client.password')
-            ->assertJsonPath('data.client.schools.0.phone', '0240000000');
+            ->assertJsonPath('data.client.schools.0.phone', '0240000000')
+            ->assertJsonPath('data.client.schools.0.city', 'Accra')
+            ->assertJsonPath('data.client.schools.0.type', SchoolType::Private->value);
 
         $this->assertNotEmpty($response->json('data.token'));
         $this->assertDatabaseHas('clients', [
@@ -60,7 +66,10 @@ class AuthenticationTest extends TestCase
             'name' => 'Ama Owner',
             'email' => 'ama@example.com',
             'password' => 'Password1!',
+            'schoolName' => 'Ridge JHS',
             'address' => '12 Ridge Street',
+            'city' => 'Accra',
+            'type' => SchoolType::Private->value,
             'phone' => '0240000000',
         ])->assertUnprocessable()
             ->assertJsonValidationErrors(['email']);
@@ -72,7 +81,10 @@ class AuthenticationTest extends TestCase
             'name' => 'Ama Owner',
             'email' => 'ama@example.com',
             'password' => 'Password1!',
+            'schoolName' => 'Ridge JHS',
             'address' => '12 Ridge Street',
+            'city' => 'Accra',
+            'type' => SchoolType::Private->value,
             'phone' => '0240000000',
             'role' => Role::Teacher->value,
         ])->assertCreated()
@@ -90,7 +102,10 @@ class AuthenticationTest extends TestCase
             'name' => 'Ama Owner',
             'email' => 'ama@example.com',
             'password' => 'password',
+            'schoolName' => 'Ridge JHS',
             'address' => '12 Ridge Street',
+            'city' => 'Accra',
+            'type' => SchoolType::Private->value,
             'phone' => '0240000000',
         ])->assertUnprocessable()
             ->assertJsonValidationErrors(['password']);

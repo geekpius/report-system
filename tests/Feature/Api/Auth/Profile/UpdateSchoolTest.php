@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Auth\Profile;
 
+use App\Enums\SchoolType;
 use App\Models\Client;
 use App\Models\School;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,6 +18,7 @@ class UpdateSchoolTest extends TestCase
         $school = School::factory()->for($owner, 'owner')->create([
             'name' => 'Ridge JHS',
             'address' => '12 Ridge Street',
+            'city' => 'Accra',
             'phone' => '0240000000',
         ]);
         $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
@@ -25,6 +27,8 @@ class UpdateSchoolTest extends TestCase
             ->putJson(route('api.profile.schools.update', $school), [
                 'name' => 'Ridge SHS',
                 'address' => '14 Ridge Street',
+                'city' => 'Kumasi',
+                'type' => SchoolType::Public->value,
                 'phone' => '0241111111',
                 'motto' => 'Learn well',
                 'email' => 'office@ridge.edu.gh',
@@ -35,6 +39,8 @@ class UpdateSchoolTest extends TestCase
             ->assertJsonPath('data.id', $school->id)
             ->assertJsonPath('data.name', 'Ridge SHS')
             ->assertJsonPath('data.address', '14 Ridge Street')
+            ->assertJsonPath('data.city', 'Kumasi')
+            ->assertJsonPath('data.type', SchoolType::Public->value)
             ->assertJsonPath('data.phone', '0241111111')
             ->assertJsonPath('data.motto', 'Learn well')
             ->assertJsonPath('data.email', 'office@ridge.edu.gh')
@@ -59,6 +65,8 @@ class UpdateSchoolTest extends TestCase
             ->putJson(route('api.profile.schools.update', $school), [
                 'name' => 'Ridge SHS',
                 'address' => '14 Ridge Street',
+                'city' => 'Kumasi',
+                'type' => SchoolType::Public->value,
                 'phone' => '0241111111',
                 'owner_id' => $otherOwner->id,
             ])
@@ -78,6 +86,8 @@ class UpdateSchoolTest extends TestCase
             ->putJson(route('api.profile.schools.update', $otherSchool), [
                 'name' => 'Ridge SHS',
                 'address' => '14 Ridge Street',
+                'city' => 'Kumasi',
+                'type' => SchoolType::Public->value,
                 'phone' => '0241111111',
             ])
             ->assertForbidden();
@@ -93,6 +103,8 @@ class UpdateSchoolTest extends TestCase
             ->putJson(route('api.profile.schools.update', $school), [
                 'name' => 'Ridge SHS',
                 'address' => '14 Ridge Street',
+                'city' => 'Kumasi',
+                'type' => SchoolType::Public->value,
                 'phone' => '0241111111',
             ])
             ->assertForbidden();
@@ -108,6 +120,8 @@ class UpdateSchoolTest extends TestCase
             ->putJson(route('api.profile.schools.update', $school), [
                 'name' => 'Ridge SHS',
                 'address' => '14 Ridge Street',
+                'city' => 'Kumasi',
+                'type' => SchoolType::Public->value,
                 'phone' => '0241111111',
             ])
             ->assertForbidden();
@@ -135,6 +149,6 @@ class UpdateSchoolTest extends TestCase
                 'motto' => 'Learn well',
             ])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['name', 'address', 'phone']);
+            ->assertJsonValidationErrors(['name', 'address', 'city', 'type', 'phone']);
     }
 }

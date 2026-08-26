@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Enums\Role;
+use App\Enums\SchoolType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Auth\SignUpRequest;
 use App\Http\Resources\ClientResource;
@@ -27,6 +28,8 @@ class RegisteredClientController extends Controller
         School::create([
             'name' => $request->string('schoolName'),
             'address' => $request->string('address'),
+            'city' => $request->string('city'),
+            'type' => $request->enum('type', SchoolType::class),
             'phone' => $request->string('phone'),
             'owner_id' => $client->id,
         ]);

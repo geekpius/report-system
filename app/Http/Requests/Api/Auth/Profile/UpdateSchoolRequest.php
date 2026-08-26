@@ -3,10 +3,12 @@
 namespace App\Http\Requests\Api\Auth\Profile;
 
 use App\Enums\Role;
+use App\Enums\SchoolType;
 use App\Models\Client;
 use App\Models\School;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateSchoolRequest extends FormRequest
 {
@@ -32,6 +34,8 @@ class UpdateSchoolRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
+            'city' => ['required', 'string', 'max:255'],
+            'type' => ['required', Rule::enum(SchoolType::class)],
             'phone' => ['required', 'string', 'max:255'],
             'imageUrl' => ['nullable', 'string', 'max:255'],
             'motto' => ['nullable', 'string', 'max:255'],

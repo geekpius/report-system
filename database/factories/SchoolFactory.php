@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\SchoolType;
 use App\Models\Client;
 use App\Models\School;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,7 +21,9 @@ class SchoolFactory extends Factory
     {
         return [
             'name' => fake()->company().' School',
-            'address' => fake()->address(),
+            'address' => fake()->streetAddress(),
+            'city' => fake()->city(),
+            'type' => fake()->randomElement(SchoolType::cases()),
             'image_url' => null,
             'phone' => fake()->phoneNumber(),
             'motto' => fake()->optional()->sentence(4),

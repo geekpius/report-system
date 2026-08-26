@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\Auth;
 
+use App\Enums\SchoolType;
 use App\Models\Client;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -35,8 +36,10 @@ class SignUpRequest extends FormRequest
                     ->numbers()
                     ->symbols(),
             ],
-            "schoolName" => ['required', 'string', 'max:255'],
+            'schoolName' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
+            'city' => ['required', 'string', 'max:255'],
+            'type' => ['required', Rule::enum(SchoolType::class)],
             'phone' => ['required', 'string', 'max:255'],
         ];
     }

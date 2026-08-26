@@ -15,6 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name');
             $table->string('address');
+            $table->string('city');
+            $table->string('type');
             $table->string('image_url')->nullable();
             $table->string('phone');
             $table->string('motto')->nullable();

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SchoolType;
 use Database\Factories\SchoolFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -16,6 +17,8 @@ use Illuminate\Support\Carbon;
  * @property string $id
  * @property string $name
  * @property string $address
+ * @property string $city
+ * @property SchoolType $type
  * @property string|null $image_url
  * @property string $phone
  * @property string|null $motto
@@ -24,11 +27,21 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'address', 'image_url', 'phone', 'motto', 'email', 'owner_id'])]
+#[Fillable(['name', 'address', 'city', 'type', 'image_url', 'phone', 'motto', 'email', 'owner_id'])]
 class School extends Model
 {
     /** @use HasFactory<SchoolFactory> */
     use HasFactory, HasUuids;
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'type' => SchoolType::class,
+        ];
+    }
 
     /**
      * @return BelongsTo<Client, $this>
