@@ -1724,6 +1724,1120 @@
                 ]
             }
         },
+        "/schools/{school}/class-marks/pending": {
+            "get": {
+                "tags": [
+                    "Class Marks"
+                ],
+                "summary": "List students with pending class marks",
+                "description": "Students who take the subject in the class and term but have no class-score contribution, or a contribution of 0. Marks with closeClassScoreEntry true are excluded. Requires schoolClassId, subjectId, and termId.",
+                "operationId": "becf5d77067566f07786555c137958fc",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "schoolClassId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subjectId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "termId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "academicYearId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pending class marks retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Pending class marks retrieved successfully."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MarkEntry"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/class-marks/recorded": {
+            "get": {
+                "tags": [
+                    "Class Marks"
+                ],
+                "summary": "List students with recorded class marks",
+                "description": "Students whose class-score contribution is greater than 0 and closeClassScoreEntry is false.",
+                "operationId": "1854a682937af4726e48f21c8105797a",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "schoolClassId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subjectId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "termId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "academicYearId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recorded class marks retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Recorded class marks retrieved successfully."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MarkEntry"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/class-marks/close": {
+            "post": {
+                "tags": [
+                    "Class Marks"
+                ],
+                "summary": "Close class score entry",
+                "description": "Sets closeClassScoreEntry to true for all matching marks. Closed marks are excluded from pending and recorded class-mark lists. Requires schoolClassId, subjectId, and termId.",
+                "operationId": "9d9cbb2ae0a7e80292dc2ee79255d035",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "schoolClassId",
+                                    "subjectId",
+                                    "termId"
+                                ],
+                                "properties": {
+                                    "schoolClassId": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "subjectId": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "termId": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "academicYearId": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Class score entry closed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Class score entry closed successfully."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Mark"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/class-marks": {
+            "post": {
+                "tags": [
+                    "Class Marks"
+                ],
+                "summary": "Create a class mark",
+                "description": "Enter continuous assessment scores. Exam score is stored as 0 until exam marks are submitted. Required class fields depend on the school scoring mode.",
+                "operationId": "a4fc7a6090809d42bab14c387a960c46",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/StoreClassMarkTotalScoreRequest"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/StoreClassMarkDivisionScoreRequest"
+                                    }
+                                ]
+                            },
+                            "examples": {
+                                "total_score": {
+                                    "summary": "Payload when scoring mode is total_score",
+                                    "value": {
+                                        "studentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "subjectId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "schoolClassId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "studentClassEnrollmentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "academicYearId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "termId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "classScore": 40
+                                    }
+                                },
+                                "division_score": {
+                                    "summary": "Payload when scoring mode is division_score",
+                                    "value": {
+                                        "studentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "subjectId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "schoolClassId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "studentClassEnrollmentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "academicYearId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "termId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "classScore": 12,
+                                        "homeAssignmentScore": 14,
+                                        "projectScore": 13,
+                                        "classTestScore": 15
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Class mark created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Class mark created successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Mark"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/class-marks/{mark}": {
+            "put": {
+                "tags": [
+                    "Class Marks"
+                ],
+                "summary": "Update a class mark",
+                "description": "Updates continuous assessment scores without changing the exam score.",
+                "operationId": "c0f490826d2fa28739286bb119e55c84",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "mark",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/UpdateClassMarkTotalScoreRequest"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/UpdateClassMarkDivisionScoreRequest"
+                                    }
+                                ]
+                            },
+                            "examples": {
+                                "total_score": {
+                                    "summary": "Payload when scoring mode is total_score",
+                                    "value": {
+                                        "classScore": 40
+                                    }
+                                },
+                                "division_score": {
+                                    "summary": "Payload when scoring mode is division_score",
+                                    "value": {
+                                        "classScore": 12,
+                                        "homeAssignmentScore": 14,
+                                        "projectScore": 13,
+                                        "classTestScore": 15
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Class mark updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Class mark updated successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Mark"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/exam-marks/pending": {
+            "get": {
+                "tags": [
+                    "Exam Marks"
+                ],
+                "summary": "List students with pending exam marks",
+                "description": "Students who take the subject in the class and term but have no exam score, or an exam score of 0. Marks with closeExamScoreEntry true are excluded. Requires schoolClassId, subjectId, and termId.",
+                "operationId": "8a4586e0eac5224ef5d04484a9698816",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "schoolClassId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subjectId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "termId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "academicYearId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pending exam marks retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Pending exam marks retrieved successfully."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MarkEntry"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/exam-marks/recorded": {
+            "get": {
+                "tags": [
+                    "Exam Marks"
+                ],
+                "summary": "List students with recorded exam marks",
+                "description": "Students whose exam score is greater than 0 and closeExamScoreEntry is false.",
+                "operationId": "7e72c53528757f4d2959fed38f4b6522",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "schoolClassId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subjectId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "termId",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "academicYearId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recorded exam marks retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Recorded exam marks retrieved successfully."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MarkEntry"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/exam-marks/close": {
+            "post": {
+                "tags": [
+                    "Exam Marks"
+                ],
+                "summary": "Close exam score entry",
+                "description": "Sets closeExamScoreEntry to true for all matching marks. Closed marks are excluded from pending and recorded exam-mark lists. Requires schoolClassId, subjectId, and termId.",
+                "operationId": "1bb0cf6de2090ef6eb29f3d69bc7f2e0",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "schoolClassId",
+                                    "subjectId",
+                                    "termId"
+                                ],
+                                "properties": {
+                                    "schoolClassId": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "subjectId": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "termId": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "academicYearId": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Exam score entry closed successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Exam score entry closed successfully."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Mark"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/exam-marks": {
+            "put": {
+                "tags": [
+                    "Exam Marks"
+                ],
+                "summary": "Create or update an exam mark",
+                "description": "Updates the exam score when a class mark already exists for the student, subject, and term. Creates the mark with class scores of 0 if it does not exist. participated is required; examScore is required when participated is true. When participated is false, grade is stored as null.",
+                "operationId": "49922aa9d604e5a063f72113272fd414",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/UpsertExamMarkTotalScoreRequest"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/UpsertExamMarkDivisionScoreRequest"
+                                    }
+                                ]
+                            },
+                            "examples": {
+                                "total_score": {
+                                    "summary": "Payload when scoring mode is total_score",
+                                    "value": {
+                                        "studentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "subjectId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "schoolClassId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "studentClassEnrollmentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "academicYearId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "termId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "participated": true,
+                                        "examScore": 70
+                                    }
+                                },
+                                "division_score": {
+                                    "summary": "Payload when scoring mode is division_score",
+                                    "value": {
+                                        "studentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "subjectId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "schoolClassId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "studentClassEnrollmentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "academicYearId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "termId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                                        "participated": true,
+                                        "examScore": 80
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Exam mark updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Exam mark updated successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Mark"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Exam mark created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Exam mark created successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Mark"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/schools/{school}/marks": {
             "get": {
                 "tags": [
@@ -1850,13 +2964,16 @@
                         "sanctum": []
                     }
                 ]
-            },
-            "post": {
+            }
+        },
+        "/schools/{school}/mark-settings": {
+            "get": {
                 "tags": [
-                    "Marks"
+                    "Mark Settings"
                 ],
-                "summary": "Create a mark",
-                "operationId": "cc7721019fd2f3c1851b31be5f02e61d",
+                "summary": "Get mark settings",
+                "description": "Returns the school scoring setup. Creates default total-score settings if none exist.",
+                "operationId": "6d726d3b1a31a2165a326a4e4adaf800",
                 "parameters": [
                     {
                         "name": "school",
@@ -1868,93 +2985,9 @@
                         }
                     }
                 ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "studentId",
-                                    "subjectId",
-                                    "schoolClassId",
-                                    "studentClassEnrollmentId",
-                                    "academicYearId",
-                                    "termId",
-                                    "classScore",
-                                    "homeAssignmentScore",
-                                    "projectScore",
-                                    "classTestScore",
-                                    "examScore"
-                                ],
-                                "properties": {
-                                    "studentId": {
-                                        "type": "string",
-                                        "format": "uuid"
-                                    },
-                                    "subjectId": {
-                                        "type": "string",
-                                        "format": "uuid"
-                                    },
-                                    "schoolClassId": {
-                                        "type": "string",
-                                        "format": "uuid"
-                                    },
-                                    "studentClassEnrollmentId": {
-                                        "type": "string",
-                                        "format": "uuid"
-                                    },
-                                    "academicYearId": {
-                                        "type": "string",
-                                        "format": "uuid"
-                                    },
-                                    "termId": {
-                                        "type": "string",
-                                        "format": "uuid"
-                                    },
-                                    "classScore": {
-                                        "type": "number",
-                                        "example": 10,
-                                        "maximum": 15,
-                                        "minimum": 0
-                                    },
-                                    "homeAssignmentScore": {
-                                        "type": "number",
-                                        "example": 12,
-                                        "maximum": 15,
-                                        "minimum": 0
-                                    },
-                                    "projectScore": {
-                                        "type": "number",
-                                        "example": 14,
-                                        "maximum": 15,
-                                        "minimum": 0
-                                    },
-                                    "classTestScore": {
-                                        "type": "number",
-                                        "example": 13,
-                                        "maximum": 15,
-                                        "minimum": 0
-                                    },
-                                    "examScore": {
-                                        "type": "number",
-                                        "example": 70,
-                                        "maximum": 100,
-                                        "minimum": 0
-                                    },
-                                    "teacherId": {
-                                        "type": "string",
-                                        "format": "uuid",
-                                        "nullable": true
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
                 "responses": {
-                    "201": {
-                        "description": "Mark created successfully",
+                    "200": {
+                        "description": "Mark settings retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1965,10 +2998,10 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Mark created successfully."
+                                            "example": "Mark settings retrieved successfully."
                                         },
                                         "data": {
-                                            "$ref": "#/components/schemas/Mark"
+                                            "$ref": "#/components/schemas/MarkSetting"
                                         }
                                     },
                                     "type": "object"
@@ -1995,16 +3028,6 @@
                                 }
                             }
                         }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ValidationError"
-                                }
-                            }
-                        }
                     }
                 },
                 "security": [
@@ -2012,27 +3035,17 @@
                         "sanctum": []
                     }
                 ]
-            }
-        },
-        "/schools/{school}/marks/{mark}": {
+            },
             "put": {
                 "tags": [
-                    "Marks"
+                    "Mark Settings"
                 ],
-                "summary": "Update a mark",
-                "operationId": "fcf6644d15f42130becd89b410726868",
+                "summary": "Update mark settings",
+                "description": "Updates the active scoring mode and both total-score and division-score configurations. divisionTotal and divisionTotalPercent are derived by the backend.",
+                "operationId": "7c3c2d9ba637fbdd5ba18609cd91d020",
                 "parameters": [
                     {
                         "name": "school",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    },
-                    {
-                        "name": "mark",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -2046,36 +3059,81 @@
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "scoringMode",
+                                    "totalScore",
+                                    "divisionScore"
+                                ],
                                 "properties": {
-                                    "classScore": {
-                                        "type": "number",
-                                        "maximum": 15,
-                                        "minimum": 0
-                                    },
-                                    "homeAssignmentScore": {
-                                        "type": "number",
-                                        "maximum": 15,
-                                        "minimum": 0
-                                    },
-                                    "projectScore": {
-                                        "type": "number",
-                                        "maximum": 15,
-                                        "minimum": 0
-                                    },
-                                    "classTestScore": {
-                                        "type": "number",
-                                        "maximum": 15,
-                                        "minimum": 0
-                                    },
-                                    "examScore": {
-                                        "type": "number",
-                                        "maximum": 100,
-                                        "minimum": 0
-                                    },
-                                    "teacherId": {
+                                    "scoringMode": {
                                         "type": "string",
-                                        "format": "uuid",
-                                        "nullable": true
+                                        "example": "total_score"
+                                    },
+                                    "totalScore": {
+                                        "required": [
+                                            "classScorePercent",
+                                            "examScorePercent"
+                                        ],
+                                        "properties": {
+                                            "classScorePercent": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 50,
+                                                "maximum": 100,
+                                                "minimum": 0
+                                            },
+                                            "examScorePercent": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 50,
+                                                "maximum": 100,
+                                                "minimum": 0
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "divisionScore": {
+                                        "required": [
+                                            "classScoreMax",
+                                            "homeAssignmentMax",
+                                            "projectMax",
+                                            "classTestMax",
+                                            "examAllocationPercent"
+                                        ],
+                                        "properties": {
+                                            "classScoreMax": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 15,
+                                                "minimum": 0
+                                            },
+                                            "homeAssignmentMax": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 15,
+                                                "minimum": 0
+                                            },
+                                            "projectMax": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 15,
+                                                "minimum": 0
+                                            },
+                                            "classTestMax": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 15,
+                                                "minimum": 0
+                                            },
+                                            "examAllocationPercent": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 50,
+                                                "maximum": 100,
+                                                "minimum": 0
+                                            }
+                                        },
+                                        "type": "object"
                                     }
                                 },
                                 "type": "object"
@@ -2085,7 +3143,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Mark updated successfully",
+                        "description": "Mark settings updated successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2096,10 +3154,10 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Mark updated successfully."
+                                            "example": "Mark settings updated successfully."
                                         },
                                         "data": {
-                                            "$ref": "#/components/schemas/Mark"
+                                            "$ref": "#/components/schemas/MarkSetting"
                                         }
                                     },
                                     "type": "object"
@@ -3253,6 +4311,404 @@
     },
     "components": {
         "schemas": {
+            "StoreClassMarkTotalScoreRequest": {
+                "required": [
+                    "studentId",
+                    "subjectId",
+                    "schoolClassId",
+                    "studentClassEnrollmentId",
+                    "academicYearId",
+                    "termId",
+                    "classScore"
+                ],
+                "properties": {
+                    "studentId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "subjectId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "schoolClassId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "studentClassEnrollmentId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "academicYearId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "termId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "classScore": {
+                        "description": "Must not exceed classScorePercent on the active mark setting.",
+                        "type": "number",
+                        "example": 40,
+                        "minimum": 0
+                    },
+                    "teacherId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "studentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "subjectId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "schoolClassId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "studentClassEnrollmentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "academicYearId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "termId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "classScore": 40,
+                    "teacherId": null
+                }
+            },
+            "StoreClassMarkDivisionScoreRequest": {
+                "required": [
+                    "studentId",
+                    "subjectId",
+                    "schoolClassId",
+                    "studentClassEnrollmentId",
+                    "academicYearId",
+                    "termId",
+                    "classScore",
+                    "homeAssignmentScore",
+                    "projectScore",
+                    "classTestScore"
+                ],
+                "properties": {
+                    "studentId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "subjectId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "schoolClassId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "studentClassEnrollmentId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "academicYearId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "termId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "classScore": {
+                        "description": "Must not exceed classScoreMax on the active mark setting.",
+                        "type": "number",
+                        "example": 12,
+                        "minimum": 0
+                    },
+                    "homeAssignmentScore": {
+                        "description": "Must not exceed homeAssignmentMax on the active mark setting.",
+                        "type": "number",
+                        "example": 14,
+                        "minimum": 0
+                    },
+                    "projectScore": {
+                        "description": "Must not exceed projectMax on the active mark setting.",
+                        "type": "number",
+                        "example": 13,
+                        "minimum": 0
+                    },
+                    "classTestScore": {
+                        "description": "Must not exceed classTestMax on the active mark setting.",
+                        "type": "number",
+                        "example": 15,
+                        "minimum": 0
+                    },
+                    "teacherId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "studentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "subjectId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "schoolClassId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "studentClassEnrollmentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "academicYearId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "termId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "classScore": 12,
+                    "homeAssignmentScore": 14,
+                    "projectScore": 13,
+                    "classTestScore": 15,
+                    "teacherId": null
+                }
+            },
+            "UpdateClassMarkTotalScoreRequest": {
+                "properties": {
+                    "classScore": {
+                        "type": "number",
+                        "example": 40,
+                        "minimum": 0
+                    },
+                    "teacherId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "classScore": 40
+                }
+            },
+            "UpdateClassMarkDivisionScoreRequest": {
+                "properties": {
+                    "classScore": {
+                        "type": "number",
+                        "example": 12,
+                        "minimum": 0
+                    },
+                    "homeAssignmentScore": {
+                        "type": "number",
+                        "example": 14,
+                        "minimum": 0
+                    },
+                    "projectScore": {
+                        "type": "number",
+                        "example": 13,
+                        "minimum": 0
+                    },
+                    "classTestScore": {
+                        "type": "number",
+                        "example": 15,
+                        "minimum": 0
+                    },
+                    "teacherId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "classScore": 12,
+                    "homeAssignmentScore": 14,
+                    "projectScore": 13,
+                    "classTestScore": 15
+                }
+            },
+            "UpsertExamMarkTotalScoreRequest": {
+                "required": [
+                    "studentId",
+                    "subjectId",
+                    "schoolClassId",
+                    "studentClassEnrollmentId",
+                    "academicYearId",
+                    "termId",
+                    "participated",
+                    "examScore"
+                ],
+                "properties": {
+                    "studentId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "subjectId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "schoolClassId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "studentClassEnrollmentId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "academicYearId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "termId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "participated": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "examScore": {
+                        "description": "Exam score out of 100. Required when participated is true.",
+                        "type": "number",
+                        "example": 70,
+                        "maximum": 100,
+                        "minimum": 0
+                    },
+                    "teacherId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "studentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "subjectId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "schoolClassId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "studentClassEnrollmentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "academicYearId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "termId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "participated": true,
+                    "examScore": 70
+                }
+            },
+            "UpsertExamMarkDivisionScoreRequest": {
+                "required": [
+                    "studentId",
+                    "subjectId",
+                    "schoolClassId",
+                    "studentClassEnrollmentId",
+                    "academicYearId",
+                    "termId",
+                    "participated",
+                    "examScore"
+                ],
+                "properties": {
+                    "studentId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "subjectId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "schoolClassId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "studentClassEnrollmentId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "academicYearId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "termId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "participated": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "examScore": {
+                        "description": "Exam score out of 100. Required when participated is true.",
+                        "type": "number",
+                        "example": 80,
+                        "maximum": 100,
+                        "minimum": 0
+                    },
+                    "teacherId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "studentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "subjectId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "schoolClassId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "studentClassEnrollmentId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "academicYearId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "termId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    "participated": true,
+                    "examScore": 80
+                }
+            },
+            "MarkSetting": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "schoolId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "scoringMode": {
+                        "type": "string",
+                        "example": "total_score"
+                    },
+                    "totalScore": {
+                        "properties": {
+                            "classScorePercent": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 50
+                            },
+                            "examScorePercent": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 50
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "divisionScore": {
+                        "properties": {
+                            "classScoreMax": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 15
+                            },
+                            "homeAssignmentMax": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 15
+                            },
+                            "projectMax": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 15
+                            },
+                            "classTestMax": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 15
+                            },
+                            "divisionTotal": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 60
+                            },
+                            "divisionTotalPercent": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 50
+                            },
+                            "examAllocationPercent": {
+                                "type": "number",
+                                "format": "float",
+                                "example": 50
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
             "ApiSuccess": {
                 "properties": {
                     "success": {
@@ -3717,6 +5173,10 @@
                         "type": "string",
                         "format": "uuid"
                     },
+                    "schoolId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
                     "studentId": {
                         "type": "string",
                         "format": "uuid"
@@ -3740,6 +5200,10 @@
                     "termId": {
                         "type": "string",
                         "format": "uuid"
+                    },
+                    "participated": {
+                        "type": "boolean",
+                        "example": true
                     },
                     "classScore": {
                         "type": "number",
@@ -3773,6 +5237,24 @@
                     "totalScore": {
                         "type": "number"
                     },
+                    "classScoreUpdatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "examScoreUpdatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "closeClassScoreEntry": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "closeExamScoreEntry": {
+                        "type": "boolean",
+                        "example": false
+                    },
                     "grade": {
                         "type": "string",
                         "example": "A",
@@ -3786,6 +5268,14 @@
                     "teacherId": {
                         "type": "string",
                         "format": "uuid",
+                        "nullable": true
+                    },
+                    "school": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/School"
+                            }
+                        ],
                         "nullable": true
                     },
                     "student": {
@@ -3834,6 +5324,114 @@
                                 "$ref": "#/components/schemas/Teacher"
                             }
                         ],
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "MarkEntry": {
+                "properties": {
+                    "studentId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "subjectId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "schoolClassId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "studentClassEnrollmentId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "academicYearId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "termId": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "student": {
+                        "$ref": "#/components/schemas/Student"
+                    },
+                    "mark": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/MarkEntryMark"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "MarkEntryMark": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "participated": {
+                        "type": "boolean"
+                    },
+                    "classScore": {
+                        "type": "number"
+                    },
+                    "homeAssignmentScore": {
+                        "type": "number"
+                    },
+                    "projectScore": {
+                        "type": "number"
+                    },
+                    "classTestScore": {
+                        "type": "number"
+                    },
+                    "continuousAssessmentScore": {
+                        "type": "number"
+                    },
+                    "continuousAssessmentContribution": {
+                        "type": "number"
+                    },
+                    "examScore": {
+                        "type": "number"
+                    },
+                    "examContribution": {
+                        "type": "number"
+                    },
+                    "totalScore": {
+                        "type": "number"
+                    },
+                    "classScoreUpdatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "examScoreUpdatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "closeClassScoreEntry": {
+                        "type": "boolean"
+                    },
+                    "closeExamScoreEntry": {
+                        "type": "boolean"
+                    },
+                    "grade": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "gradeRemark": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "teacherId": {
+                        "type": "string",
+                        "format": "uuid",
                         "nullable": true
                     }
                 },
@@ -4084,8 +5682,20 @@
             "description": "Class Subject Teachers"
         },
         {
+            "name": "Class Marks",
+            "description": "Class Marks"
+        },
+        {
+            "name": "Exam Marks",
+            "description": "Exam Marks"
+        },
+        {
             "name": "Marks",
             "description": "Marks"
+        },
+        {
+            "name": "Mark Settings",
+            "description": "Mark Settings"
         },
         {
             "name": "School Classes",

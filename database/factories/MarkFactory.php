@@ -35,12 +35,14 @@ class MarkFactory extends Factory
         ]);
 
         return [
+            'school_id' => $school->id,
             'student_id' => $student->id,
             'subject_id' => $subject->id,
             'school_class_id' => $schoolClass->id,
             'student_class_enrollment_id' => $enrollment->id,
             'academic_year_id' => $academicYear->id,
             'term_id' => $term->id,
+            'participated' => true,
             'class_score' => 12,
             'home_assignment_score' => 14,
             'project_score' => 13,
@@ -48,5 +50,20 @@ class MarkFactory extends Factory
             'exam_score' => 80,
             'teacher_id' => null,
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterMaking(function (Mark $mark): void {
+            if ($mark->student_id === null) {
+                return;
+            }
+
+            $schoolId = Student::query()->whereKey($mark->student_id)->value('school_id');
+
+            if (is_string($schoolId)) {
+                $mark->school_id = $schoolId;
+            }
+        });
     }
 }

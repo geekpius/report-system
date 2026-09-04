@@ -8,8 +8,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Auth\SignUpRequest;
 use App\Http\Resources\ClientResource;
 use App\Models\Client;
+use App\Models\MarkSetting;
 use App\Models\School;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use OpenApi\Attributes as OA;
 
 class RegisteredClientController extends Controller
@@ -59,21 +61,27 @@ class RegisteredClientController extends Controller
     )]
     public function store(SignUpRequest $request): JsonResponse
     {
-        $client = Client::create([
-            'name' => $request->string('name'),
-            'email' => $request->string('email'),
-            'password' => $request->string('password'),
-            'role' => Role::Owner,
-        ]);
+        $client = DB::transaction(function () use ($request): Client {
+            $client = Client::create([
+                'name' => $request->string('name'),
+                'email' => $request->string('email'),
+                'password' => $request->string('password'),
+                'role' => Role::Owner,
+            ]);
 
-        School::create([
-            'name' => $request->string('schoolName'),
-            'address' => $request->string('address'),
-            'city' => $request->string('city'),
-            'type' => $request->enum('type', SchoolType::class),
-            'phone' => $request->string('phone'),
-            'owner_id' => $client->id,
-        ]);
+            $school = School::create([
+                'name' => $request->string('schoolName'),
+                'address' => $request->string('address'),
+                'city' => $request->string('city'),
+                'type' => $request->enum('type', SchoolType::class),
+                'phone' => $request->string('phone'),
+                'owner_id' => $client->id,
+            ]);
+
+            MarkSetting::resolveForSchool($school);
+
+            return $client;
+        });
 
         $tokenName = 'api-'.$client->role->value;
         $permissions = 'permit:'.$client->role->value;

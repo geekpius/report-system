@@ -193,12 +193,14 @@ use OpenApi\Attributes as OA;
     schema: 'Mark',
     properties: [
         new OA\Property(property: 'id', type: 'string', format: 'uuid'),
+        new OA\Property(property: 'schoolId', type: 'string', format: 'uuid'),
         new OA\Property(property: 'studentId', type: 'string', format: 'uuid'),
         new OA\Property(property: 'subjectId', type: 'string', format: 'uuid'),
         new OA\Property(property: 'schoolClassId', type: 'string', format: 'uuid'),
         new OA\Property(property: 'studentClassEnrollmentId', type: 'string', format: 'uuid'),
         new OA\Property(property: 'academicYearId', type: 'string', format: 'uuid'),
         new OA\Property(property: 'termId', type: 'string', format: 'uuid'),
+        new OA\Property(property: 'participated', type: 'boolean', example: true),
         new OA\Property(property: 'classScore', type: 'number', example: 10),
         new OA\Property(property: 'homeAssignmentScore', type: 'number', example: 12),
         new OA\Property(property: 'projectScore', type: 'number', example: 14),
@@ -208,15 +210,56 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'examScore', type: 'number', example: 70),
         new OA\Property(property: 'examContribution', type: 'number'),
         new OA\Property(property: 'totalScore', type: 'number'),
+        new OA\Property(property: 'classScoreUpdatedAt', type: 'string', format: 'date-time', nullable: true),
+        new OA\Property(property: 'examScoreUpdatedAt', type: 'string', format: 'date-time', nullable: true),
+        new OA\Property(property: 'closeClassScoreEntry', type: 'boolean', example: false),
+        new OA\Property(property: 'closeExamScoreEntry', type: 'boolean', example: false),
         new OA\Property(property: 'grade', type: 'string', nullable: true, example: 'A'),
         new OA\Property(property: 'gradeRemark', type: 'string', nullable: true, example: 'Excellent'),
         new OA\Property(property: 'teacherId', type: 'string', format: 'uuid', nullable: true),
+        new OA\Property(property: 'school', ref: '#/components/schemas/School', nullable: true),
         new OA\Property(property: 'student', ref: '#/components/schemas/Student', nullable: true),
         new OA\Property(property: 'subject', ref: '#/components/schemas/Subject', nullable: true),
         new OA\Property(property: 'schoolClass', ref: '#/components/schemas/SchoolClass', nullable: true),
         new OA\Property(property: 'academicYear', ref: '#/components/schemas/AcademicYear', nullable: true),
         new OA\Property(property: 'term', ref: '#/components/schemas/Term', nullable: true),
         new OA\Property(property: 'teacher', ref: '#/components/schemas/Teacher', nullable: true),
+    ]
+)]
+#[OA\Schema(
+    schema: 'MarkEntry',
+    properties: [
+        new OA\Property(property: 'studentId', type: 'string', format: 'uuid'),
+        new OA\Property(property: 'subjectId', type: 'string', format: 'uuid'),
+        new OA\Property(property: 'schoolClassId', type: 'string', format: 'uuid'),
+        new OA\Property(property: 'studentClassEnrollmentId', type: 'string', format: 'uuid'),
+        new OA\Property(property: 'academicYearId', type: 'string', format: 'uuid'),
+        new OA\Property(property: 'termId', type: 'string', format: 'uuid'),
+        new OA\Property(property: 'student', ref: '#/components/schemas/Student'),
+        new OA\Property(property: 'mark', ref: '#/components/schemas/MarkEntryMark', nullable: true),
+    ]
+)]
+#[OA\Schema(
+    schema: 'MarkEntryMark',
+    properties: [
+        new OA\Property(property: 'id', type: 'string', format: 'uuid'),
+        new OA\Property(property: 'participated', type: 'boolean'),
+        new OA\Property(property: 'classScore', type: 'number'),
+        new OA\Property(property: 'homeAssignmentScore', type: 'number'),
+        new OA\Property(property: 'projectScore', type: 'number'),
+        new OA\Property(property: 'classTestScore', type: 'number'),
+        new OA\Property(property: 'continuousAssessmentScore', type: 'number'),
+        new OA\Property(property: 'continuousAssessmentContribution', type: 'number'),
+        new OA\Property(property: 'examScore', type: 'number'),
+        new OA\Property(property: 'examContribution', type: 'number'),
+        new OA\Property(property: 'totalScore', type: 'number'),
+        new OA\Property(property: 'classScoreUpdatedAt', type: 'string', format: 'date-time', nullable: true),
+        new OA\Property(property: 'examScoreUpdatedAt', type: 'string', format: 'date-time', nullable: true),
+        new OA\Property(property: 'closeClassScoreEntry', type: 'boolean'),
+        new OA\Property(property: 'closeExamScoreEntry', type: 'boolean'),
+        new OA\Property(property: 'grade', type: 'string', nullable: true),
+        new OA\Property(property: 'gradeRemark', type: 'string', nullable: true),
+        new OA\Property(property: 'teacherId', type: 'string', format: 'uuid', nullable: true),
     ]
 )]
 #[OA\Schema(
@@ -276,4 +319,5 @@ use OpenApi\Attributes as OA;
 )]
 class OpenApiSpec
 {
+    // Shared OpenAPI schemas for l5-swagger.
 }

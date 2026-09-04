@@ -9,7 +9,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @mixin Mark
  */
-class MarkResource extends JsonResource
+class MarkEntryMarkResource extends JsonResource
 {
     /**
      * @return array<string, mixed>
@@ -18,13 +18,6 @@ class MarkResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'schoolId' => $this->school_id,
-            'studentId' => $this->student_id,
-            'subjectId' => $this->subject_id,
-            'schoolClassId' => $this->school_class_id,
-            'studentClassEnrollmentId' => $this->student_class_enrollment_id,
-            'academicYearId' => $this->academic_year_id,
-            'termId' => $this->term_id,
             'participated' => $this->participated,
             'classScore' => (float) $this->class_score,
             'homeAssignmentScore' => (float) $this->home_assignment_score,
@@ -42,14 +35,6 @@ class MarkResource extends JsonResource
             'grade' => $this->grade,
             'gradeRemark' => $this->grade_remark,
             'teacherId' => $this->teacher_id,
-            'student' => new StudentResource($this->whenLoaded('student')),
-            'subject' => new SubjectResource($this->whenLoaded('subject')),
-            'schoolClass' => new SchoolClassResource($this->whenLoaded('schoolClass')),
-            'classEnrollment' => new StudentClassEnrollmentResource($this->whenLoaded('classEnrollment')),
-            'academicYear' => new AcademicYearResource($this->whenLoaded('academicYear')),
-            'term' => new TermResource($this->whenLoaded('term')),
-            'teacher' => new TeacherResource($this->whenLoaded('teacher')),
-            'school' => new SchoolResource($this->whenLoaded('school')),
         ];
     }
 }

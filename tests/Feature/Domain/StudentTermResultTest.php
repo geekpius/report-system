@@ -7,6 +7,7 @@ use App\Enums\StudentSubjectStatus;
 use App\Models\AcademicYear;
 use App\Models\ClassSubject;
 use App\Models\Mark;
+use App\Models\MarkSetting;
 use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\Student;
@@ -26,6 +27,7 @@ class StudentTermResultTest extends TestCase
     public function test_mark_observer_recalculates_student_term_results(): void
     {
         $school = School::factory()->create();
+        MarkSetting::factory()->division()->create(['school_id' => $school->id]);
         $student = Student::factory()->create(['school_id' => $school->id]);
         $schoolClass = SchoolClass::factory()->create(['school_id' => $school->id]);
         $academicYear = AcademicYear::factory()->create(['school_id' => $school->id]);
@@ -94,6 +96,7 @@ class StudentTermResultTest extends TestCase
     public function test_class_positions_are_ranked_by_average_score(): void
     {
         $school = School::factory()->create();
+        MarkSetting::factory()->division()->create(['school_id' => $school->id]);
         $schoolClass = SchoolClass::factory()->create(['school_id' => $school->id]);
         $academicYear = AcademicYear::factory()->create(['school_id' => $school->id]);
         $term = Term::factory()->create(['academic_year_id' => $academicYear->id]);
@@ -181,6 +184,7 @@ class StudentTermResultTest extends TestCase
     public function test_students_without_all_mandatory_marks_do_not_receive_a_class_position(): void
     {
         $school = School::factory()->create();
+        MarkSetting::factory()->division()->create(['school_id' => $school->id]);
         $student = Student::factory()->create(['school_id' => $school->id]);
         $schoolClass = SchoolClass::factory()->create(['school_id' => $school->id]);
         $academicYear = AcademicYear::factory()->create(['school_id' => $school->id]);
@@ -234,5 +238,64 @@ class StudentTermResultTest extends TestCase
 
         $this->assertNotNull($result);
         $this->assertNull($result->class_position);
+    }
+
+    public function test_class_marks_without_an_exam_score_do_not_create_a_term_result(): void
+    {
+        $school = School::factory()->create();
+        MarkSetting::factory()->division()->create(['school_id' => $school->id]);
+        $student = Student::factory()->create(['school_id' => $school->id]);
+        $schoolClass = SchoolClass::factory()->create(['school_id' => $school->id]);
+        $academicYear = AcademicYear::factory()->create(['school_id' => $school->id]);
+        $term = Term::factory()->create(['academic_year_id' => $academicYear->id]);
+        $subject = Subject::factory()->create(['school_id' => $school->id]);
+        $enrollment = StudentClassEnrollment::factory()->create([
+            'student_id' => $student->id,
+            'school_class_id' => $schoolClass->id,
+            'academic_year_id' => $academicYear->id,
+        ]);
+        StudentSubject::factory()->create([
+            'student_id' => $student->id,
+            'subject_id' => $subject->id,
+            'school_class_id' => $schoolClass->id,
+            'student_class_enrollment_id' => $enrollment->id,
+            'status' => StudentSubjectStatus::Active,
+        ]);
+
+        $mark = Mark::factory()->create([
+            'student_id' => $student->id,
+            'subject_id' => $subject->id,
+            'school_class_id' => $schoolClass->id,
+            'student_class_enrollment_id' => $enrollment->id,
+            'academic_year_id' => $academicYear->id,
+            'term_id' => $term->id,
+            'class_score' => 12,
+            'home_assignment_score' => 14,
+            'project_score' => 13,
+            'class_test_score' => 15,
+            'exam_score' => 0,
+        ]);
+
+        $this->assertDatabaseMissing('student_term_results', [
+            'student_class_enrollment_id' => $enrollment->id,
+            'term_id' => $term->id,
+        ]);
+
+        $mark->update(['class_score' => 10]);
+
+        $this->assertDatabaseHas('student_term_results', [
+            'student_class_enrollment_id' => $enrollment->id,
+            'term_id' => $term->id,
+        ]);
+
+        $mark->update(['exam_score' => 80]);
+
+        $result = StudentTermResult::query()
+            ->where('student_class_enrollment_id', $enrollment->id)
+            ->where('term_id', $term->id)
+            ->first();
+
+        $this->assertNotNull($result);
+        $this->assertSame('83.33', $result->total_score);
     }
 }

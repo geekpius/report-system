@@ -14,12 +14,14 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property string $id
+ * @property string $school_id
  * @property string $student_id
  * @property string $subject_id
  * @property string $school_class_id
  * @property string $student_class_enrollment_id
  * @property string $academic_year_id
  * @property string $term_id
+ * @property bool $participated
  * @property string $class_score
  * @property string $home_assignment_score
  * @property string $project_score
@@ -29,6 +31,10 @@ use Illuminate\Support\Carbon;
  * @property string $exam_score
  * @property string $exam_contribution
  * @property string $total_score
+ * @property Carbon|null $class_score_updated_at
+ * @property Carbon|null $exam_score_updated_at
+ * @property bool $close_class_score_entry
+ * @property bool $close_exam_score_entry
  * @property string|null $grade
  * @property string|null $grade_remark
  * @property string|null $teacher_id
@@ -36,12 +42,14 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  */
 #[Fillable([
+    'school_id',
     'student_id',
     'subject_id',
     'school_class_id',
     'student_class_enrollment_id',
     'academic_year_id',
     'term_id',
+    'participated',
     'class_score',
     'home_assignment_score',
     'project_score',
@@ -56,11 +64,21 @@ class Mark extends Model
     use HasFactory, HasUuids;
 
     /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'participated' => true,
+        'close_class_score_entry' => false,
+        'close_exam_score_entry' => false,
+    ];
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
     {
         return [
+            'participated' => 'boolean',
             'class_score' => 'decimal:2',
             'home_assignment_score' => 'decimal:2',
             'project_score' => 'decimal:2',
@@ -70,7 +88,19 @@ class Mark extends Model
             'exam_score' => 'decimal:2',
             'exam_contribution' => 'decimal:2',
             'total_score' => 'decimal:2',
+            'class_score_updated_at' => 'datetime',
+            'exam_score_updated_at' => 'datetime',
+            'close_class_score_entry' => 'boolean',
+            'close_exam_score_entry' => 'boolean',
         ];
+    }
+
+    /**
+     * @return BelongsTo<School, $this>
+     */
+    public function school(): BelongsTo
+    {
+        return $this->belongsTo(School::class);
     }
 
     /**

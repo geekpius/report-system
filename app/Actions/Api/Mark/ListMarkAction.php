@@ -16,7 +16,7 @@ class ListMarkAction
     public function handle(ListMarkRequest $request, School $school): JsonResponse
     {
         $marks = Mark::query()
-            ->whereHas('student', fn ($query) => $query->where('school_id', $school->id))
+            ->where('school_id', $school->id)
             ->when($request->validated('studentId'), fn ($query, $studentId) => $query->where('student_id', $studentId))
             ->when($request->validated('schoolClassId'), fn ($query, $schoolClassId) => $query->where('school_class_id', $schoolClassId))
             ->when($request->validated('termId'), fn ($query, $termId) => $query->where('term_id', $termId))

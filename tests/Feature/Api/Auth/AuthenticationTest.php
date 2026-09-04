@@ -4,7 +4,9 @@ namespace Tests\Feature\Api\Auth;
 
 use App\Enums\Role;
 use App\Enums\SchoolType;
+use App\Enums\ScoringMode;
 use App\Models\Client;
+use App\Models\MarkSetting;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -50,6 +52,14 @@ class AuthenticationTest extends TestCase
         $this->assertTrue(Hash::check('Password1!', $client->password));
         $this->assertNotSame('Password1!', $client->getRawOriginal('password'));
         $this->assertGuest();
+
+        $school = School::query()->where('owner_id', $client->id)->first();
+        $this->assertNotNull($school);
+        $this->assertDatabaseHas('mark_settings', [
+            'school_id' => $school->id,
+            'scoring_mode' => ScoringMode::TotalScore->value,
+        ]);
+        $this->assertTrue(MarkSetting::query()->where('school_id', $school->id)->exists());
 
         $this->withToken($response->json('data.token'))
             ->getJson(route('api.me'))

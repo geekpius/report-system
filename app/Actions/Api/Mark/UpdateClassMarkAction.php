@@ -3,33 +3,35 @@
 namespace App\Actions\Api\Mark;
 
 use App\Concerns\ApiResponse;
-use App\Http\Requests\Api\Mark\StoreMarkRequest;
+use App\Http\Requests\Api\Mark\UpdateClassMarkRequest;
 use App\Http\Resources\MarkResource;
 use App\Models\Mark;
-use App\Models\School;
 use Illuminate\Http\JsonResponse;
 use Throwable;
 
-class StoreMarkAction
+class UpdateClassMarkAction
 {
     use ApiResponse;
 
-    public function handle(StoreMarkRequest $request, School $school): JsonResponse
+    public function handle(UpdateClassMarkRequest $request, Mark $mark): JsonResponse
     {
         try {
-            $mark = Mark::query()->create(snake_keys($request->validated()));
+            if ($mark->close_class_score_entry) {
+                return $this->error('Class score entry is closed for this mark.', 422);
+            }
+
+            $mark->update(snake_keys($request->validated()));
         } catch (Throwable $exception) {
             report($exception);
 
-            return $this->error('Unable to create mark.');
+            return $this->error('Unable to update class mark.');
         }
 
         return $this->success(
             MarkResource::make(
                 $mark->load(['student', 'subject', 'schoolClass', 'academicYear', 'term', 'teacher']),
             ),
-            'Mark created successfully.',
-            201,
+            'Class mark updated successfully.',
         );
     }
 }

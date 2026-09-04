@@ -7,6 +7,7 @@ use App\Enums\StudentSubjectStatus;
 use App\Models\AcademicYear;
 use App\Models\Client;
 use App\Models\Mark;
+use App\Models\MarkSetting;
 use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\Student;
@@ -26,6 +27,7 @@ class StudentTermResultTest extends TestCase
     {
         $owner = Client::factory()->owner()->create();
         $school = School::factory()->for($owner, 'owner')->create();
+        MarkSetting::factory()->division()->create(['school_id' => $school->id]);
         $student = Student::factory()->create(['school_id' => $school->id]);
         $schoolClass = SchoolClass::factory()->create(['school_id' => $school->id, 'name' => 'JHS 1']);
         $academicYear = AcademicYear::factory()->create(['school_id' => $school->id, 'name' => '2025/2026']);

@@ -10,7 +10,10 @@ use App\Http\Controllers\Api\Auth\Profile\UpdateTeacherController;
 use App\Http\Controllers\Api\Auth\RegisteredClientController;
 use App\Http\Controllers\Api\ClassSubject\ClassSubjectController;
 use App\Http\Controllers\Api\ClassSubjectTeacher\ClassSubjectTeacherController;
+use App\Http\Controllers\Api\Mark\ClassMarkController;
+use App\Http\Controllers\Api\Mark\ExamMarkController;
 use App\Http\Controllers\Api\Mark\MarkController;
+use App\Http\Controllers\Api\MarkSetting\MarkSettingController;
 use App\Http\Controllers\Api\SchoolClass\SchoolClassController;
 use App\Http\Controllers\Api\StudentClassEnrollment\StudentClassEnrollmentController;
 use App\Http\Controllers\Api\StudentSubject\StudentSubjectController;
@@ -122,16 +125,50 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.schools.aggregates.update');
     });
 
+    // mark setting routes
+    Route::prefix('schools/{school}/mark-settings')->middleware('abilities:permit:owner')->group(function () {
+        Route::get('/', [MarkSettingController::class, 'show'])
+            ->name('api.schools.mark-settings.show');
+
+        Route::put('/', [MarkSettingController::class, 'update'])
+            ->name('api.schools.mark-settings.update');
+    });
+
     // mark routes
     Route::prefix('schools/{school}/marks')->middleware('abilities:permit:owner')->group(function () {
         Route::get('/', [MarkController::class, 'index'])
             ->name('api.schools.marks.index');
+    });
 
-        Route::post('/', [MarkController::class, 'store'])
-            ->name('api.schools.marks.store');
+    Route::prefix('schools/{school}/class-marks')->middleware('abilities:permit:owner')->group(function () {
+        Route::get('/pending', [ClassMarkController::class, 'pending'])
+            ->name('api.schools.class-marks.pending');
 
-        Route::put('/{mark}', [MarkController::class, 'update'])
-            ->name('api.schools.marks.update');
+        Route::get('/recorded', [ClassMarkController::class, 'recorded'])
+            ->name('api.schools.class-marks.recorded');
+
+        Route::post('/close', [ClassMarkController::class, 'close'])
+            ->name('api.schools.class-marks.close');
+
+        Route::post('/', [ClassMarkController::class, 'store'])
+            ->name('api.schools.class-marks.store');
+
+        Route::put('/{mark}', [ClassMarkController::class, 'update'])
+            ->name('api.schools.class-marks.update');
+    });
+
+    Route::prefix('schools/{school}/exam-marks')->middleware('abilities:permit:owner')->group(function () {
+        Route::get('/pending', [ExamMarkController::class, 'pending'])
+            ->name('api.schools.exam-marks.pending');
+
+        Route::get('/recorded', [ExamMarkController::class, 'recorded'])
+            ->name('api.schools.exam-marks.recorded');
+
+        Route::post('/close', [ExamMarkController::class, 'close'])
+            ->name('api.schools.exam-marks.close');
+
+        Route::put('/', [ExamMarkController::class, 'upsert'])
+            ->name('api.schools.exam-marks.upsert');
     });
 
     // student term result routes
