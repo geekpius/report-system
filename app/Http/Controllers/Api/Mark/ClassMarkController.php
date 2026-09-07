@@ -97,7 +97,7 @@ class ClassMarkController extends Controller
     #[OA\Post(
         path: '/schools/{school}/class-marks/close',
         summary: 'Close class score entry',
-        description: 'Sets closeClassScoreEntry to true for all matching marks. Closed marks are excluded from pending and recorded class-mark lists. Requires schoolClassId, subjectId, and termId.',
+        description: 'Sets closeClassScoreEntry to true for matching marks that are still open. Returns those marks without nested student, subject, class, year, term, or teacher objects. Closed marks are excluded from pending and recorded class-mark lists. Requires schoolClassId, subjectId, and termId.',
         security: [['sanctum' => []]],
         tags: ['Class Marks'],
         parameters: [
@@ -123,7 +123,40 @@ class ClassMarkController extends Controller
                     properties: [
                         new OA\Property(property: 'success', type: 'boolean', example: true),
                         new OA\Property(property: 'message', type: 'string', example: 'Class score entry closed successfully.'),
-                        new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/Mark')),
+                        new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/MarkWithoutRelations')),
+                    ],
+                    example: [
+                        'success' => true,
+                        'message' => 'Class score entry closed successfully.',
+                        'data' => [
+                            [
+                                'id' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                'schoolId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                'studentId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                'subjectId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                'schoolClassId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                'studentClassEnrollmentId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                'academicYearId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                'termId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                'participated' => true,
+                                'classScore' => 12,
+                                'homeAssignmentScore' => 14,
+                                'projectScore' => 13,
+                                'classTestScore' => 15,
+                                'continuousAssessmentScore' => 54,
+                                'continuousAssessmentContribution' => 45,
+                                'examScore' => 0,
+                                'examContribution' => 0,
+                                'totalScore' => 45,
+                                'classScoreUpdatedAt' => '2026-09-07T10:00:00+00:00',
+                                'examScoreUpdatedAt' => null,
+                                'closeClassScoreEntry' => true,
+                                'closeExamScoreEntry' => false,
+                                'grade' => 'D',
+                                'gradeRemark' => 'Pass',
+                                'teacherId' => null,
+                            ],
+                        ],
                     ]
                 )
             ),
@@ -142,8 +175,8 @@ class ClassMarkController extends Controller
 
     #[OA\Post(
         path: '/schools/{school}/class-marks',
-        summary: 'Create a class mark',
-        description: 'Enter continuous assessment scores. Exam score is stored as 0 until exam marks are submitted. Required class fields depend on the school scoring mode.',
+        summary: 'Create class marks',
+        description: 'Enter continuous assessment scores for one or more students. Exam score is stored as 0 until exam marks are submitted. Required class fields depend on the school scoring mode. Returns the created marks without nested student, subject, class, year, term, or teacher objects.',
         security: [['sanctum' => []]],
         tags: ['Class Marks'],
         parameters: [
@@ -161,29 +194,37 @@ class ClassMarkController extends Controller
                         example: 'total_score',
                         summary: 'Payload when scoring mode is total_score',
                         value: [
-                            'studentId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-                            'subjectId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-                            'schoolClassId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-                            'studentClassEnrollmentId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-                            'academicYearId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-                            'termId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-                            'classScore' => 40,
+                            'marks' => [
+                                [
+                                    'studentId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                    'subjectId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                    'schoolClassId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                    'studentClassEnrollmentId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                    'academicYearId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                    'termId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                    'classScore' => 40,
+                                ],
+                            ],
                         ]
                     ),
                     new OA\Examples(
                         example: 'division_score',
                         summary: 'Payload when scoring mode is division_score',
                         value: [
-                            'studentId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-                            'subjectId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-                            'schoolClassId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-                            'studentClassEnrollmentId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-                            'academicYearId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-                            'termId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-                            'classScore' => 12,
-                            'homeAssignmentScore' => 14,
-                            'projectScore' => 13,
-                            'classTestScore' => 15,
+                            'marks' => [
+                                [
+                                    'studentId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                    'subjectId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                    'schoolClassId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                    'studentClassEnrollmentId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                    'academicYearId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                    'termId' => '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+                                    'classScore' => 12,
+                                    'homeAssignmentScore' => 14,
+                                    'projectScore' => 13,
+                                    'classTestScore' => 15,
+                                ],
+                            ],
                         ]
                     ),
                 ]
@@ -192,12 +233,12 @@ class ClassMarkController extends Controller
         responses: [
             new OA\Response(
                 response: 201,
-                description: 'Class mark created successfully',
+                description: 'Class marks created successfully',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'success', type: 'boolean', example: true),
-                        new OA\Property(property: 'message', type: 'string', example: 'Class mark created successfully.'),
-                        new OA\Property(property: 'data', ref: '#/components/schemas/Mark'),
+                        new OA\Property(property: 'message', type: 'string', example: 'Class marks created successfully.'),
+                        new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/MarkWithoutRelations')),
                     ]
                 )
             ),
@@ -217,7 +258,7 @@ class ClassMarkController extends Controller
     #[OA\Put(
         path: '/schools/{school}/class-marks/{mark}',
         summary: 'Update a class mark',
-        description: 'Updates continuous assessment scores without changing the exam score.',
+        description: 'Updates continuous assessment scores for a single mark without changing the exam score. Returns the mark without nested student, subject, class, year, term, or teacher objects. Rejects the request when closeClassScoreEntry is true.',
         security: [['sanctum' => []]],
         tags: ['Class Marks'],
         parameters: [
@@ -260,13 +301,22 @@ class ClassMarkController extends Controller
                     properties: [
                         new OA\Property(property: 'success', type: 'boolean', example: true),
                         new OA\Property(property: 'message', type: 'string', example: 'Class mark updated successfully.'),
-                        new OA\Property(property: 'data', ref: '#/components/schemas/Mark'),
+                        new OA\Property(property: 'data', ref: '#/components/schemas/MarkWithoutRelations'),
                     ]
                 )
             ),
             new OA\Response(response: 401, description: 'Unauthenticated', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
             new OA\Response(response: 403, description: 'Forbidden', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
-            new OA\Response(response: 422, description: 'Validation error', content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')),
+            new OA\Response(
+                response: 422,
+                description: 'Validation error, or class score entry is closed for this mark',
+                content: new OA\JsonContent(
+                    oneOf: [
+                        new OA\Schema(ref: '#/components/schemas/ValidationError'),
+                        new OA\Schema(ref: '#/components/schemas/ApiError'),
+                    ]
+                )
+            ),
         ]
     )]
     public function update(

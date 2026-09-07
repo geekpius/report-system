@@ -120,18 +120,22 @@ class MarkEntryTest extends TestCase
      */
     protected function classPayload(array $context, Student $student, StudentClassEnrollment $enrollment, array $overrides = []): array
     {
-        return array_merge([
-            'studentId' => $student->id,
-            'subjectId' => $context['subject']->id,
-            'schoolClassId' => $context['schoolClass']->id,
-            'studentClassEnrollmentId' => $enrollment->id,
-            'academicYearId' => $context['academicYear']->id,
-            'termId' => $context['term']->id,
-            'classScore' => 12,
-            'homeAssignmentScore' => 14,
-            'projectScore' => 13,
-            'classTestScore' => 15,
-        ], $overrides);
+        return [
+            'marks' => [
+                array_merge([
+                    'studentId' => $student->id,
+                    'subjectId' => $context['subject']->id,
+                    'schoolClassId' => $context['schoolClass']->id,
+                    'studentClassEnrollmentId' => $enrollment->id,
+                    'academicYearId' => $context['academicYear']->id,
+                    'termId' => $context['term']->id,
+                    'classScore' => 12,
+                    'homeAssignmentScore' => 14,
+                    'projectScore' => 13,
+                    'classTestScore' => 15,
+                ], $overrides),
+            ],
+        ];
     }
 
     /**
@@ -141,16 +145,20 @@ class MarkEntryTest extends TestCase
      */
     protected function examPayload(array $context, Student $student, StudentClassEnrollment $enrollment, array $overrides = []): array
     {
-        return array_merge([
-            'studentId' => $student->id,
-            'subjectId' => $context['subject']->id,
-            'schoolClassId' => $context['schoolClass']->id,
-            'studentClassEnrollmentId' => $enrollment->id,
-            'academicYearId' => $context['academicYear']->id,
-            'termId' => $context['term']->id,
-            'participated' => true,
-            'examScore' => 80,
-        ], $overrides);
+        return [
+            'marks' => [
+                array_merge([
+                    'studentId' => $student->id,
+                    'subjectId' => $context['subject']->id,
+                    'schoolClassId' => $context['schoolClass']->id,
+                    'studentClassEnrollmentId' => $enrollment->id,
+                    'academicYearId' => $context['academicYear']->id,
+                    'termId' => $context['term']->id,
+                    'participated' => true,
+                    'examScore' => 80,
+                ], $overrides),
+            ],
+        ];
     }
 
     public function test_class_mark_pending_lists_students_without_a_class_score_contribution(): void
@@ -378,7 +386,7 @@ class MarkEntryTest extends TestCase
 
         $this->withToken($context['token'])
             ->putJson(
-                route('api.schools.class-marks.update', [$context['school'], $response->json('data.id')]),
+                route('api.schools.class-marks.update', [$context['school'], $response->json('data.0.id')]),
                 ['classScore' => 10, 'homeAssignmentScore' => 10, 'projectScore' => 10, 'classTestScore' => 10],
             )
             ->assertUnprocessable()

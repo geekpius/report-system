@@ -21,85 +21,116 @@ trait ValidatesMarkIdentity
     /**
      * @return array<string, mixed>
      */
-    protected function markIdentityRules(mixed $school, bool $unique): array
+    protected function markIdentityRules(mixed $school, bool $unique, string $prefix = ''): array
     {
         if (! $school instanceof School) {
             return [];
         }
 
-        $subjectRules = [
-            'required',
-            'uuid',
-            Rule::exists(Subject::class, 'id')->where('school_id', $school->id),
-            function (string $attribute, mixed $value, Closure $fail): void {
-                $enrollmentId = $this->input('studentClassEnrollmentId');
-                $studentId = $this->input('studentId');
-
-                if (! is_string($enrollmentId) || ! is_string($studentId) || ! is_string($value)) {
-                    return;
-                }
-
-                $takesSubject = StudentSubject::query()
-                    ->where('student_class_enrollment_id', $enrollmentId)
-                    ->where('student_id', $studentId)
-                    ->where('subject_id', $value)
-                    ->where('status', StudentSubjectStatus::Active)
-                    ->exists();
-
-                if (! $takesSubject) {
-                    $fail('The student does not have an active enrollment for this subject.');
-                }
-            },
-        ];
-
-        if ($unique) {
-            $subjectRules[] = Rule::unique(Mark::class, 'subject_id')
-                ->where('student_class_enrollment_id', $this->input('studentClassEnrollmentId'))
-                ->where('term_id', $this->input('termId'));
-        }
+        $field = fn (string $name): string => $this->markField($name, $prefix);
 
         return [
-            'studentId' => [
+            $field('studentId') => [
                 'required',
                 'uuid',
                 Rule::exists(Student::class, 'id')->where('school_id', $school->id),
             ],
-            'subjectId' => $subjectRules,
-            'schoolClassId' => [
+            $field('subjectId') => [
+                'required',
+                'uuid',
+                Rule::exists(Subject::class, 'id')->where('school_id', $school->id),
+                function (string $attribute, mixed $value, Closure $fail) use ($unique): void {
+                    $enrollmentId = $this->siblingValue($attribute, 'studentClassEnrollmentId');
+                    $studentId = $this->siblingValue($attribute, 'studentId');
+                    $termId = $this->siblingValue($attribute, 'termId');
+
+                    if (! is_string($enrollmentId) || ! is_string($studentId) || ! is_string($value)) {
+                        return;
+                    }
+
+                    $takesSubject = StudentSubject::query()
+                        ->where('student_class_enrollment_id', $enrollmentId)
+                        ->where('student_id', $studentId)
+                        ->where('subject_id', $value)
+                        ->where('status', StudentSubjectStatus::Active)
+                        ->exists();
+
+                    if (! $takesSubject) {
+                        $fail('The student does not have an active enrollment for this subject.');
+                    }
+
+                    if (! $unique || ! is_string($termId)) {
+                        return;
+                    }
+
+                    $alreadyExists = Mark::query()
+                        ->where('student_class_enrollment_id', $enrollmentId)
+                        ->where('subject_id', $value)
+                        ->where('term_id', $termId)
+                        ->exists();
+
+                    if ($alreadyExists) {
+                        $fail('A mark already exists for this student, subject, and term.');
+                    }
+                },
+            ],
+            $field('schoolClassId') => [
                 'required',
                 'uuid',
                 Rule::exists(SchoolClass::class, 'id')->where('school_id', $school->id),
             ],
-            'studentClassEnrollmentId' => [
+            $field('studentClassEnrollmentId') => [
                 'required',
                 'uuid',
-                Rule::exists(StudentClassEnrollment::class, 'id')
-                    ->where('student_id', $this->input('studentId'))
-                    ->where('school_class_id', $this->input('schoolClassId'))
-                    ->where('academic_year_id', $this->input('academicYearId'))
-                    ->where('status', EnrollmentStatus::Active->value),
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if (! is_string($value)) {
+                        return;
+                    }
+
+                    $exists = StudentClassEnrollment::query()
+                        ->whereKey($value)
+                        ->where('student_id', $this->siblingValue($attribute, 'studentId'))
+                        ->where('school_class_id', $this->siblingValue($attribute, 'schoolClassId'))
+                        ->where('academic_year_id', $this->siblingValue($attribute, 'academicYearId'))
+                        ->where('status', EnrollmentStatus::Active)
+                        ->exists();
+
+                    if (! $exists) {
+                        $fail('The selected enrollment must be an active enrollment for this student and class.');
+                    }
+                },
             ],
-            'academicYearId' => [
+            $field('academicYearId') => [
                 'required',
                 'uuid',
                 Rule::exists(AcademicYear::class, 'id')->where('school_id', $school->id),
             ],
-            'termId' => [
+            $field('termId') => [
                 'required',
                 'uuid',
-                Rule::exists(Term::class, 'id')->where('academic_year_id', $this->input('academicYearId')),
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if (! is_string($value)) {
+                        return;
+                    }
+
+                    $exists = Term::query()
+                        ->whereKey($value)
+                        ->where('academic_year_id', $this->siblingValue($attribute, 'academicYearId'))
+                        ->exists();
+
+                    if (! $exists) {
+                        $fail('The selected term is invalid for the given academic year.');
+                    }
+                },
             ],
         ];
     }
 
-    /**
-     * @return array<string, string>
-     */
-    protected function markIdentityMessages(): array
+    protected function siblingValue(string $attribute, string $name): mixed
     {
-        return [
-            'subjectId.unique' => 'A mark already exists for this student, subject, and term.',
-            'studentClassEnrollmentId.exists' => 'The selected enrollment must be an active enrollment for this student and class.',
-        ];
+        $segments = explode('.', $attribute);
+        $segments[array_key_last($segments)] = $name;
+
+        return $this->input(implode('.', $segments));
     }
 }

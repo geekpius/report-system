@@ -190,7 +190,8 @@ use OpenApi\Attributes as OA;
     ]
 )]
 #[OA\Schema(
-    schema: 'Mark',
+    schema: 'MarkWithoutRelations',
+    description: 'A mark without nested student, subject, class, year, term, teacher, or school objects.',
     properties: [
         new OA\Property(property: 'id', type: 'string', format: 'uuid'),
         new OA\Property(property: 'schoolId', type: 'string', format: 'uuid'),
@@ -217,13 +218,23 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'grade', type: 'string', nullable: true, example: 'A'),
         new OA\Property(property: 'gradeRemark', type: 'string', nullable: true, example: 'Excellent'),
         new OA\Property(property: 'teacherId', type: 'string', format: 'uuid', nullable: true),
-        new OA\Property(property: 'school', ref: '#/components/schemas/School', nullable: true),
-        new OA\Property(property: 'student', ref: '#/components/schemas/Student', nullable: true),
-        new OA\Property(property: 'subject', ref: '#/components/schemas/Subject', nullable: true),
-        new OA\Property(property: 'schoolClass', ref: '#/components/schemas/SchoolClass', nullable: true),
-        new OA\Property(property: 'academicYear', ref: '#/components/schemas/AcademicYear', nullable: true),
-        new OA\Property(property: 'term', ref: '#/components/schemas/Term', nullable: true),
-        new OA\Property(property: 'teacher', ref: '#/components/schemas/Teacher', nullable: true),
+    ]
+)]
+#[OA\Schema(
+    schema: 'Mark',
+    allOf: [
+        new OA\Schema(ref: '#/components/schemas/MarkWithoutRelations'),
+        new OA\Schema(
+            properties: [
+                new OA\Property(property: 'school', ref: '#/components/schemas/School', nullable: true),
+                new OA\Property(property: 'student', ref: '#/components/schemas/Student', nullable: true),
+                new OA\Property(property: 'subject', ref: '#/components/schemas/Subject', nullable: true),
+                new OA\Property(property: 'schoolClass', ref: '#/components/schemas/SchoolClass', nullable: true),
+                new OA\Property(property: 'academicYear', ref: '#/components/schemas/AcademicYear', nullable: true),
+                new OA\Property(property: 'term', ref: '#/components/schemas/Term', nullable: true),
+                new OA\Property(property: 'teacher', ref: '#/components/schemas/Teacher', nullable: true),
+            ]
+        ),
     ]
 )]
 #[OA\Schema(

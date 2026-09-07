@@ -9,6 +9,7 @@ use App\Models\Teacher;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class UpsertExamMarkRequest extends FormRequest
 {
@@ -34,9 +35,10 @@ class UpsertExamMarkRequest extends FormRequest
         $school = $this->route('school');
 
         return [
-            ...$this->markIdentityRules($school, false),
-            ...$this->examScoreRules($school, true),
-            'teacherId' => [
+            'marks' => ['required', 'array', 'min:1'],
+            ...$this->markIdentityRules($school, false, 'marks.*'),
+            ...$this->examScoreRules($school, true, 'marks.*'),
+            'marks.*.teacherId' => [
                 'sometimes',
                 'nullable',
                 'uuid',
@@ -50,9 +52,51 @@ class UpsertExamMarkRequest extends FormRequest
      */
     public function messages(): array
     {
-        return [
-            ...$this->markIdentityMessages(),
-            ...$this->markScoreMessages(),
-        ];
+        return $this->markScoreMessages('marks.*');
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            $this->rejectDuplicateMarkIdentities($validator);
+        });
+    }
+
+    protected function rejectDuplicateMarkIdentities(Validator $validator): void
+    {
+        $marks = $this->input('marks');
+
+        if (! is_array($marks)) {
+            return;
+        }
+
+        $seen = [];
+
+        foreach ($marks as $index => $mark) {
+            if (! is_array($mark)) {
+                continue;
+            }
+
+            $key = implode('|', [
+                $mark['studentClassEnrollmentId'] ?? '',
+                $mark['subjectId'] ?? '',
+                $mark['termId'] ?? '',
+            ]);
+
+            if ($key === '||') {
+                continue;
+            }
+
+            if (isset($seen[$key])) {
+                $validator->errors()->add(
+                    "marks.{$index}.subjectId",
+                    'A mark already exists for this student, subject, and term.',
+                );
+
+                continue;
+            }
+
+            $seen[$key] = true;
+        }
     }
 }

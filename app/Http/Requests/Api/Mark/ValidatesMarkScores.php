@@ -11,7 +11,7 @@ trait ValidatesMarkScores
     /**
      * @return array<string, mixed>
      */
-    protected function classScoreRules(mixed $school, bool $required): array
+    protected function classScoreRules(mixed $school, bool $required, string $prefix = ''): array
     {
         if (! $school instanceof School) {
             return [];
@@ -19,59 +19,70 @@ trait ValidatesMarkScores
 
         $setting = MarkSetting::resolveForSchool($school);
         $presence = $required ? 'required' : 'sometimes';
+        $field = fn (string $name): string => $this->markField($name, $prefix);
 
         if ($setting->scoring_mode === ScoringMode::TotalScore) {
             return [
-                'classScore' => [$presence, 'numeric', 'min:0', $this->maxRule($setting->class_score_percent)],
-                'homeAssignmentScore' => ['sometimes', 'numeric', 'min:0', 'max:0'],
-                'projectScore' => ['sometimes', 'numeric', 'min:0', 'max:0'],
-                'classTestScore' => ['sometimes', 'numeric', 'min:0', 'max:0'],
+                $field('classScore') => [$presence, 'numeric', 'min:0', $this->maxRule($setting->class_score_percent)],
+                $field('homeAssignmentScore') => ['sometimes', 'numeric', 'min:0', 'max:0'],
+                $field('projectScore') => ['sometimes', 'numeric', 'min:0', 'max:0'],
+                $field('classTestScore') => ['sometimes', 'numeric', 'min:0', 'max:0'],
             ];
         }
 
         return [
-            'classScore' => [$presence, 'numeric', 'min:0', $this->maxRule($setting->class_score_max)],
-            'homeAssignmentScore' => [$presence, 'numeric', 'min:0', $this->maxRule($setting->home_assignment_max)],
-            'projectScore' => [$presence, 'numeric', 'min:0', $this->maxRule($setting->project_max)],
-            'classTestScore' => [$presence, 'numeric', 'min:0', $this->maxRule($setting->class_test_max)],
+            $field('classScore') => [$presence, 'numeric', 'min:0', $this->maxRule($setting->class_score_max)],
+            $field('homeAssignmentScore') => [$presence, 'numeric', 'min:0', $this->maxRule($setting->home_assignment_max)],
+            $field('projectScore') => [$presence, 'numeric', 'min:0', $this->maxRule($setting->project_max)],
+            $field('classTestScore') => [$presence, 'numeric', 'min:0', $this->maxRule($setting->class_test_max)],
         ];
     }
 
     /**
      * @return array<string, mixed>
      */
-    protected function examScoreRules(mixed $school, bool $required): array
+    protected function examScoreRules(mixed $school, bool $required, string $prefix = ''): array
     {
         if (! $school instanceof School) {
             return [];
         }
 
-        $participatedRule = [$required ? 'required' : 'sometimes', 'boolean'];
-        $examRequired = $required && $this->boolean('participated');
-        $presence = $examRequired ? 'required' : 'sometimes';
+        $field = fn (string $name): string => $this->markField($name, $prefix);
 
         return [
-            'participated' => $participatedRule,
-            'examScore' => [$presence, 'numeric', 'min:0', 'max:100'],
+            $field('participated') => [$required ? 'required' : 'sometimes', 'boolean'],
+            $field('examScore') => [
+                $required ? 'required_if:'.$field('participated').',true' : 'sometimes',
+                'numeric',
+                'min:0',
+                'max:100',
+            ],
         ];
     }
 
     /**
      * @return array<string, string>
      */
-    protected function markScoreMessages(): array
+    protected function markScoreMessages(string $prefix = ''): array
     {
+        $field = fn (string $name): string => $this->markField($name, $prefix);
+
         return [
-            'classScore.max' => 'The class score may not be greater than the active mark setting allows.',
-            'homeAssignmentScore.max' => 'The home assignment score may not be greater than the active mark setting allows.',
-            'projectScore.max' => 'The project score may not be greater than the active mark setting allows.',
-            'classTestScore.max' => 'The class test score may not be greater than the active mark setting allows.',
-            'examScore.max' => 'The exam score may not be greater than 100.',
+            $field('classScore').'.max' => 'The class score may not be greater than the active mark setting allows.',
+            $field('homeAssignmentScore').'.max' => 'The home assignment score may not be greater than the active mark setting allows.',
+            $field('projectScore').'.max' => 'The project score may not be greater than the active mark setting allows.',
+            $field('classTestScore').'.max' => 'The class test score may not be greater than the active mark setting allows.',
+            $field('examScore').'.max' => 'The exam score may not be greater than 100.',
         ];
     }
 
     protected function maxRule(mixed $max): string
     {
         return 'max:'.(float) $max;
+    }
+
+    protected function markField(string $name, string $prefix = ''): string
+    {
+        return $prefix === '' ? $name : "{$prefix}.{$name}";
     }
 }

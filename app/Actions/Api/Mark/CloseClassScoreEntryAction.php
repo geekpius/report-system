@@ -30,9 +30,7 @@ class CloseClassScoreEntryAction
         $marks->each(fn (Mark $mark) => $mark->setAttribute('close_class_score_entry', true));
 
         return $this->success(
-            MarkResource::collection(
-                $marks->load(['student', 'subject', 'schoolClass', 'academicYear', 'term', 'teacher']),
-            ),
+            MarkResource::collection($marks),
             'Class score entry closed successfully.',
         );
     }

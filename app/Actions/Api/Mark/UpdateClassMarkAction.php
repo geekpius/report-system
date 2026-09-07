@@ -28,9 +28,7 @@ class UpdateClassMarkAction
         }
 
         return $this->success(
-            MarkResource::make(
-                $mark->load(['student', 'subject', 'schoolClass', 'academicYear', 'term', 'teacher']),
-            ),
+            MarkResource::make($mark),
             'Class mark updated successfully.',
         );
     }
