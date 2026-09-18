@@ -6,6 +6,7 @@ use App\Enums\SchoolStatus;
 use App\Enums\SchoolType;
 use Database\Factories\SchoolFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * @property string $id
@@ -38,6 +40,28 @@ class School extends Model
 {
     /** @use HasFactory<SchoolFactory> */
     use HasFactory, HasUuids;
+
+    /**
+     * @return Attribute<string, string>
+     */
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value): string => Str::title($value),
+            set: fn (string $value): string => Str::squish($value),
+        );
+    }
+
+    /**
+     * @return Attribute<string, string>
+     */
+    protected function city(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value): string => Str::title($value),
+            set: fn (string $value): string => Str::squish($value),
+        );
+    }
 
     /**
      * @return array<string, string>
