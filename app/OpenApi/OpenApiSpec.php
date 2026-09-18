@@ -53,10 +53,14 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'address', type: 'string', example: '12 Independence Ave'),
         new OA\Property(property: 'city', type: 'string', example: 'Accra'),
         new OA\Property(property: 'type', type: 'string', enum: ['private', 'public']),
-        new OA\Property(property: 'imageUrl', type: 'string', nullable: true),
+        new OA\Property(property: 'logoUrl', type: 'string', nullable: true),
+        new OA\Property(property: 'stampUrl', type: 'string', nullable: true),
+        new OA\Property(property: 'signatureUrl', type: 'string', nullable: true),
         new OA\Property(property: 'phone', type: 'string', example: '0240000000'),
         new OA\Property(property: 'motto', type: 'string', nullable: true),
         new OA\Property(property: 'email', type: 'string', format: 'email', nullable: true),
+        new OA\Property(property: 'status', type: 'string', enum: ['active', 'archived'], example: 'active'),
+        new OA\Property(property: 'inSession', type: 'boolean', example: false),
         new OA\Property(property: 'ownerId', type: 'string', format: 'uuid'),
     ]
 )]

@@ -4,7 +4,6 @@ use App\Http\Controllers\Api\AcademicYear\AcademicYearController;
 use App\Http\Controllers\Api\Aggregate\AggregateController;
 use App\Http\Controllers\Api\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Api\Auth\PasswordResetController;
-use App\Http\Controllers\Api\Auth\Profile\UpdateSchoolController;
 use App\Http\Controllers\Api\Auth\Profile\UpdateStudentController;
 use App\Http\Controllers\Api\Auth\Profile\UpdateTeacherController;
 use App\Http\Controllers\Api\Auth\RegisteredClientController;
@@ -14,6 +13,7 @@ use App\Http\Controllers\Api\Mark\ClassMarkController;
 use App\Http\Controllers\Api\Mark\ExamMarkController;
 use App\Http\Controllers\Api\Mark\MarkController;
 use App\Http\Controllers\Api\MarkSetting\MarkSettingController;
+use App\Http\Controllers\Api\School\SchoolController;
 use App\Http\Controllers\Api\SchoolClass\SchoolClassController;
 use App\Http\Controllers\Api\StudentClassEnrollment\StudentClassEnrollmentController;
 use App\Http\Controllers\Api\StudentSubject\StudentSubjectController;
@@ -48,10 +48,6 @@ Route::middleware('auth:sanctum')->group(function () {
             ->name('api.logout');
 
         // profile routes
-        Route::put('/profile/schools/{school}', [UpdateSchoolController::class, 'update'])
-            ->middleware('abilities:permit:owner')
-            ->name('api.profile.schools.update');
-
         Route::put('/profile/teachers/{teacher}', [UpdateTeacherController::class, 'update'])
             ->middleware('abilities:permit:teacher')
             ->name('api.profile.teachers.update');
@@ -59,6 +55,24 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/profile/students/{student}', [UpdateStudentController::class, 'update'])
             ->middleware('abilities:permit:student')
             ->name('api.profile.students.update');
+    });
+
+    // school routes
+    Route::middleware('abilities:permit:owner')->group(function () {
+        Route::get('/schools', [SchoolController::class, 'index'])
+            ->name('api.schools.index');
+
+        Route::post('/schools', [SchoolController::class, 'store'])
+            ->name('api.schools.store');
+
+        Route::put('/schools/{school}', [SchoolController::class, 'update'])
+            ->name('api.schools.update');
+
+        Route::put('/schools/{school}/in-session', [SchoolController::class, 'setInSession'])
+            ->name('api.schools.in-session');
+
+        Route::put('/schools/{school}/status', [SchoolController::class, 'updateStatus'])
+            ->name('api.schools.status');
     });
 
     // school class routes

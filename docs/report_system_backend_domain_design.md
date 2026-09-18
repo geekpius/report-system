@@ -80,11 +80,15 @@ is the shared login.
   `id`           Primary key
   `name`         School name
   `address`      School address
-  `image_url`    School image/logo URL, nullable
-  `phone`        School phone number
+  `logo_url`       School logo URL, nullable
+  `stamp_url`      School stamp URL, nullable
+  `signature_url`  School signature URL, nullable
+  `phone`          School phone number
   `motto`        School motto, nullable
-  `email`        School email, nullable
-  `owner_id`     Foreign key to `clients.id`
+  `email`          School email, nullable
+  `status`         School status (`active` or `archived`)
+  `in_session`     Whether the school is currently in session
+  `owner_id`       Foreign key to `clients.id`
   `created_at`   Creation timestamp
   `updated_at`   Update timestamp
 

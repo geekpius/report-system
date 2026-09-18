@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SchoolStatus;
 use App\Enums\SchoolType;
 use Database\Factories\SchoolFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -20,15 +21,19 @@ use Illuminate\Support\Carbon;
  * @property string $address
  * @property string $city
  * @property SchoolType $type
- * @property string|null $image_url
+ * @property string|null $logo_url
+ * @property string|null $stamp_url
+ * @property string|null $signature_url
  * @property string $phone
  * @property string|null $motto
  * @property string|null $email
+ * @property SchoolStatus $status
+ * @property bool $in_session
  * @property string $owner_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'address', 'city', 'type', 'image_url', 'phone', 'motto', 'email', 'owner_id'])]
+#[Fillable(['name', 'address', 'city', 'type', 'logo_url', 'stamp_url', 'signature_url', 'phone', 'motto', 'email', 'status', 'in_session', 'owner_id'])]
 class School extends Model
 {
     /** @use HasFactory<SchoolFactory> */
@@ -41,6 +46,8 @@ class School extends Model
     {
         return [
             'type' => SchoolType::class,
+            'status' => SchoolStatus::class,
+            'in_session' => 'boolean',
         ];
     }
 

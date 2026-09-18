@@ -17,10 +17,14 @@ return new class extends Migration
             $table->string('address');
             $table->string('city');
             $table->string('type');
-            $table->string('image_url')->nullable();
+            $table->string('logo_url')->nullable();
+            $table->string('stamp_url')->nullable();
+            $table->string('signature_url')->nullable();
             $table->string('phone');
             $table->string('motto')->nullable();
             $table->string('email')->nullable();
+            $table->string('status')->default('active');
+            $table->boolean('in_session')->default(false);
             $table->foreignUuid('owner_id')->constrained('clients')->cascadeOnDelete();
             $table->timestamps();
         });

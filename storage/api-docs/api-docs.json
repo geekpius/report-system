@@ -834,151 +834,6 @@
                 }
             }
         },
-        "/auth/profile/schools/{school}": {
-            "put": {
-                "tags": [
-                    "Profile"
-                ],
-                "summary": "Update school profile",
-                "description": "Updates the authenticated owner's school. Requires owner ability.",
-                "operationId": "1bd68cac982569ae5185f46e42354d64",
-                "parameters": [
-                    {
-                        "name": "school",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "name",
-                                    "address",
-                                    "city",
-                                    "type",
-                                    "phone"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "Ridge SHS",
-                                        "maxLength": 255
-                                    },
-                                    "address": {
-                                        "type": "string",
-                                        "example": "12 Independence Ave",
-                                        "maxLength": 255
-                                    },
-                                    "city": {
-                                        "type": "string",
-                                        "example": "Accra",
-                                        "maxLength": 255
-                                    },
-                                    "type": {
-                                        "type": "string",
-                                        "example": "private",
-                                        "enum": [
-                                            "private",
-                                            "public"
-                                        ]
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "0240000000",
-                                        "maxLength": 255
-                                    },
-                                    "imageUrl": {
-                                        "type": "string",
-                                        "nullable": true,
-                                        "maxLength": 255
-                                    },
-                                    "motto": {
-                                        "type": "string",
-                                        "example": "Excellence",
-                                        "nullable": true,
-                                        "maxLength": 255
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "nullable": true,
-                                        "maxLength": 255
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "School updated successfully",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "School updated successfully."
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/School"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ApiError"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ApiError"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Validation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ValidationError"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
         "/auth/profile/students/{student}": {
             "put": {
                 "tags": [
@@ -3284,6 +3139,513 @@
                 ]
             }
         },
+        "/schools": {
+            "get": {
+                "tags": [
+                    "Schools"
+                ],
+                "summary": "List schools for the authenticated owner",
+                "description": "Returns all schools owned by the authenticated client.",
+                "operationId": "eac0539999bcd8afff548e892304be60",
+                "responses": {
+                    "200": {
+                        "description": "Schools retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Schools retrieved successfully."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/School"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Schools"
+                ],
+                "summary": "Create a school for the authenticated owner",
+                "description": "Creates a school owned by the authenticated client and initializes default mark settings. New schools start as active and not in session.",
+                "operationId": "22cf876fa7c7bbd207950dcce761fd55",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "address",
+                                    "city",
+                                    "type",
+                                    "phone",
+                                    "motto",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Ridge SHS",
+                                        "maxLength": 255
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "12 Independence Ave",
+                                        "maxLength": 255
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Accra",
+                                        "maxLength": 255
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "private",
+                                        "enum": [
+                                            "private",
+                                            "public"
+                                        ]
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0240000000",
+                                        "maxLength": 255
+                                    },
+                                    "motto": {
+                                        "type": "string",
+                                        "example": "Excellence",
+                                        "maxLength": 255
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "office@ridge.edu.gh",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "School created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "School created successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/School"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}": {
+            "put": {
+                "tags": [
+                    "Schools"
+                ],
+                "summary": "Update a school",
+                "description": "Updates school profile fields for a school owned by the authenticated client. Use the in-session and status endpoints to change those values.",
+                "operationId": "bb6ed13b5e6e99e9a42296293ed3f38d",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "address",
+                                    "city",
+                                    "type",
+                                    "phone",
+                                    "motto",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Ridge SHS",
+                                        "maxLength": 255
+                                    },
+                                    "address": {
+                                        "type": "string",
+                                        "example": "12 Independence Ave",
+                                        "maxLength": 255
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Accra",
+                                        "maxLength": 255
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "private",
+                                        "enum": [
+                                            "private",
+                                            "public"
+                                        ]
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "0240000000",
+                                        "maxLength": 255
+                                    },
+                                    "motto": {
+                                        "type": "string",
+                                        "example": "Excellence",
+                                        "maxLength": 255
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "office@ridge.edu.gh",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "School updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "School updated successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/School"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/in-session": {
+            "put": {
+                "tags": [
+                    "Schools"
+                ],
+                "summary": "Set a school in session",
+                "description": "Marks the given school as in session and sets inSession to false for all other schools owned by the same client.",
+                "operationId": "13d52907df07797b012f3ba6d9580f61",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "School set in session successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "School set in session successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/School"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/status": {
+            "put": {
+                "tags": [
+                    "Schools"
+                ],
+                "summary": "Update school status",
+                "description": "Updates the status of a school owned by the authenticated client.",
+                "operationId": "92259c18b3cbd017d50d7f4876a78848",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "active",
+                                        "enum": [
+                                            "active",
+                                            "archived"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "School status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "School status updated successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/School"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/schools/{school}/classes": {
             "get": {
                 "tags": [
@@ -4851,7 +5213,15 @@
                             "public"
                         ]
                     },
-                    "imageUrl": {
+                    "logoUrl": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "stampUrl": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "signatureUrl": {
                         "type": "string",
                         "nullable": true
                     },
@@ -4867,6 +5237,18 @@
                         "type": "string",
                         "format": "email",
                         "nullable": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "active",
+                        "enum": [
+                            "active",
+                            "archived"
+                        ]
+                    },
+                    "inSession": {
+                        "type": "boolean",
+                        "example": false
                     },
                     "ownerId": {
                         "type": "string",
@@ -5782,6 +6164,10 @@
         {
             "name": "Mark Settings",
             "description": "Mark Settings"
+        },
+        {
+            "name": "Schools",
+            "description": "Schools"
         },
         {
             "name": "School Classes",

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\SchoolStatus;
 use App\Enums\SchoolType;
 use App\Models\Client;
 use App\Models\School;
@@ -24,10 +25,14 @@ class SchoolFactory extends Factory
             'address' => fake()->streetAddress(),
             'city' => fake()->city(),
             'type' => fake()->randomElement(SchoolType::cases()),
-            'image_url' => null,
+            'logo_url' => null,
+            'stamp_url' => null,
+            'signature_url' => null,
             'phone' => fake()->phoneNumber(),
             'motto' => fake()->optional()->sentence(4),
             'email' => fake()->optional()->companyEmail(),
+            'status' => SchoolStatus::Active,
+            'in_session' => true,
             'owner_id' => Client::factory()->owner(),
         ];
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Enums\Role;
+use App\Enums\SchoolStatus;
 use App\Enums\SchoolType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Auth\SignUpRequest;
@@ -75,6 +76,8 @@ class RegisteredClientController extends Controller
                 'city' => $request->string('city'),
                 'type' => $request->enum('type', SchoolType::class),
                 'phone' => $request->string('phone'),
+                'status' => SchoolStatus::Active,
+                'in_session' => false,
                 'owner_id' => $client->id,
             ]);
 
