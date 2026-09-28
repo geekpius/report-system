@@ -49,21 +49,21 @@ class SchoolController extends Controller
     #[OA\Post(
         path: '/schools',
         summary: 'Create a school for the authenticated owner',
-        description: 'Creates a school owned by the authenticated client and initializes default mark settings. New schools start as active and not in session.',
+        description: 'Creates a school owned by the authenticated client and initializes default mark settings. New schools start as active and not in session. motto and email are optional.',
         security: [['sanctum' => []]],
         tags: ['Schools'],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ['name', 'address', 'city', 'type', 'phone', 'motto', 'email'],
+                required: ['name', 'address', 'city', 'type', 'phone'],
                 properties: [
                     new OA\Property(property: 'name', type: 'string', maxLength: 255, example: 'Ridge SHS'),
                     new OA\Property(property: 'address', type: 'string', maxLength: 255, example: '12 Independence Ave'),
                     new OA\Property(property: 'city', type: 'string', maxLength: 255, example: 'Accra'),
                     new OA\Property(property: 'type', type: 'string', enum: ['private', 'public'], example: 'private'),
                     new OA\Property(property: 'phone', type: 'string', maxLength: 255, example: '0240000000'),
-                    new OA\Property(property: 'motto', type: 'string', maxLength: 255, example: 'Excellence'),
-                    new OA\Property(property: 'email', type: 'string', format: 'email', maxLength: 255, example: 'office@ridge.edu.gh'),
+                    new OA\Property(property: 'motto', type: 'string', maxLength: 255, nullable: true, example: 'Excellence'),
+                    new OA\Property(property: 'email', type: 'string', format: 'email', maxLength: 255, nullable: true, example: 'office@ridge.edu.gh'),
                 ]
             )
         ),
@@ -92,7 +92,7 @@ class SchoolController extends Controller
     #[OA\Put(
         path: '/schools/{school}',
         summary: 'Update a school',
-        description: 'Updates school profile fields for a school owned by the authenticated client. Use the in-session and status endpoints to change those values.',
+        description: 'Updates school profile fields for a school owned by the authenticated client. motto and email are optional. Use the in-session and status endpoints to change those values.',
         security: [['sanctum' => []]],
         tags: ['Schools'],
         parameters: [
@@ -101,15 +101,15 @@ class SchoolController extends Controller
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ['name', 'address', 'city', 'type', 'phone', 'motto', 'email'],
+                required: ['name', 'address', 'city', 'type', 'phone'],
                 properties: [
                     new OA\Property(property: 'name', type: 'string', maxLength: 255, example: 'Ridge SHS'),
                     new OA\Property(property: 'address', type: 'string', maxLength: 255, example: '12 Independence Ave'),
                     new OA\Property(property: 'city', type: 'string', maxLength: 255, example: 'Accra'),
                     new OA\Property(property: 'type', type: 'string', enum: ['private', 'public'], example: 'private'),
                     new OA\Property(property: 'phone', type: 'string', maxLength: 255, example: '0240000000'),
-                    new OA\Property(property: 'motto', type: 'string', maxLength: 255, example: 'Excellence'),
-                    new OA\Property(property: 'email', type: 'string', format: 'email', maxLength: 255, example: 'office@ridge.edu.gh'),
+                    new OA\Property(property: 'motto', type: 'string', maxLength: 255, nullable: true, example: 'Excellence'),
+                    new OA\Property(property: 'email', type: 'string', format: 'email', maxLength: 255, nullable: true, example: 'office@ridge.edu.gh'),
                 ]
             )
         ),

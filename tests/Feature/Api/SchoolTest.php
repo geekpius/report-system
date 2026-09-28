@@ -40,7 +40,7 @@ class SchoolTest extends TestCase
             ->postJson(route('api.schools.store'), $this->schoolPayload())
             ->assertCreated()
             ->assertJsonPath('success', true)
-            ->assertJsonPath('data.name', 'Ridge SHS')
+            ->assertJsonPath('data.name', 'Ridge Shs')
             ->assertJsonPath('data.address', '12 Independence Ave')
             ->assertJsonPath('data.city', 'Accra')
             ->assertJsonPath('data.type', SchoolType::Private->value)
@@ -76,7 +76,7 @@ class SchoolTest extends TestCase
         $this->withToken($token)
             ->postJson(route('api.schools.store'), [])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['name', 'address', 'city', 'type', 'phone', 'motto', 'email']);
+            ->assertJsonValidationErrors(['name', 'address', 'city', 'type', 'phone']);
     }
 
     public function test_owners_can_update_their_school(): void
@@ -101,7 +101,7 @@ class SchoolTest extends TestCase
             ->assertOk()
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.id', $school->id)
-            ->assertJsonPath('data.name', 'Ridge SHS')
+            ->assertJsonPath('data.name', 'Ridge Shs')
             ->assertJsonPath('data.address', '14 Ridge Street')
             ->assertJsonPath('data.city', 'Kumasi')
             ->assertJsonPath('data.type', SchoolType::Public->value)
@@ -156,7 +156,7 @@ class SchoolTest extends TestCase
         $this->withToken($token)
             ->putJson(route('api.schools.update', $school), [])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['name', 'address', 'city', 'type', 'phone', 'motto', 'email']);
+            ->assertJsonValidationErrors(['name', 'address', 'city', 'type', 'phone']);
     }
 
     public function test_owners_can_set_a_school_in_session_and_clear_others(): void

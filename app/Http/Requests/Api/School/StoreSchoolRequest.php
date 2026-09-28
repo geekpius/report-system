@@ -30,8 +30,8 @@ class StoreSchoolRequest extends FormRequest
             'city' => ['required', 'string', 'max:255'],
             'type' => ['required', Rule::enum(SchoolType::class)],
             'phone' => ['required', 'string', 'max:255'],
-            'motto' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255'],
+            'motto' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'string', 'email', 'max:255'],
         ];
     }
 }

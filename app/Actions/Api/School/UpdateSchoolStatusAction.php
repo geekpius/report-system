@@ -3,6 +3,7 @@
 namespace App\Actions\Api\School;
 
 use App\Concerns\ApiResponse;
+use App\Enums\SchoolStatus;
 use App\Http\Requests\Api\School\UpdateSchoolStatusRequest;
 use App\Http\Resources\SchoolResource;
 use App\Models\School;
@@ -23,9 +24,13 @@ class UpdateSchoolStatusAction
             return $this->error('Unable to update school status.');
         }
 
+        $message = $school->status === SchoolStatus::Active
+            ? 'School is now active.'
+            : 'School is now archived.';
+
         return $this->success(
             SchoolResource::make($school),
-            'School status updated successfully.',
+            $message,
         );
     }
 }

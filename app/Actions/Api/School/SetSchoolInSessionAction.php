@@ -33,7 +33,7 @@ class SetSchoolInSessionAction
 
         return $this->success(
             SchoolResource::make($school->fresh()),
-            'School set in session successfully.',
+            'School is now in session.',
         );
     }
 }
