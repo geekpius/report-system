@@ -32,6 +32,17 @@ use OpenApi\Attributes as OA;
     ]
 )]
 #[OA\Schema(
+    schema: 'PaginationMeta',
+    properties: [
+        new OA\Property(property: 'currentPage', type: 'integer', example: 1),
+        new OA\Property(property: 'lastPage', type: 'integer', example: 3),
+        new OA\Property(property: 'perPage', type: 'integer', example: 15),
+        new OA\Property(property: 'total', type: 'integer', example: 42),
+        new OA\Property(property: 'from', type: 'integer', nullable: true, example: 1),
+        new OA\Property(property: 'to', type: 'integer', nullable: true, example: 15),
+    ]
+)]
+#[OA\Schema(
     schema: 'ValidationError',
     properties: [
         new OA\Property(property: 'message', type: 'string', example: 'The given data was invalid.'),
@@ -71,6 +82,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'name', type: 'string', example: 'Ama Owner'),
         new OA\Property(property: 'email', type: 'string', format: 'email', example: 'owner@example.com'),
         new OA\Property(property: 'role', type: 'string', enum: ['owner', 'teacher', 'student']),
+        new OA\Property(property: 'status', type: 'string', enum: ['active', 'suspended', 'deactivated'], example: 'active'),
         new OA\Property(
             property: 'schools',
             type: 'array',
@@ -94,6 +106,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'schoolId', type: 'string', format: 'uuid'),
         new OA\Property(property: 'staffNumber', type: 'string', example: 'STF-1001'),
         new OA\Property(property: 'phone', type: 'string', example: '0240000001'),
+        new OA\Property(property: 'client', ref: '#/components/schemas/Client', nullable: true),
     ]
 )]
 #[OA\Schema(

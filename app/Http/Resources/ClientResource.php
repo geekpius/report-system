@@ -21,6 +21,7 @@ class ClientResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'role' => $this->role->value,
+            'status' => $this->status->value,
             'schools' => SchoolResource::collection($this->whenLoaded('schools')),
         ];
     }

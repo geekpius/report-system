@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
+use App\Enums\ClientStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Auth\LoginRequest;
 use App\Http\Resources\ClientResource;
@@ -50,6 +51,11 @@ class AuthenticatedSessionController extends Controller
                 content: new OA\JsonContent(ref: '#/components/schemas/ApiError')
             ),
             new OA\Response(
+                response: 403,
+                description: 'Account is not active',
+                content: new OA\JsonContent(ref: '#/components/schemas/ApiError')
+            ),
+            new OA\Response(
                 response: 422,
                 description: 'Validation error',
                 content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')
@@ -62,6 +68,14 @@ class AuthenticatedSessionController extends Controller
 
         if (! $client || ! Hash::check($request->string('password'), $client->password)) {
             return $this->error(__('auth.failed'), 401);
+        }
+
+        if ($client->status === ClientStatus::Suspended) {
+            return $this->error('Your account is suspended. Please contact support.', 403);
+        }
+
+        if ($client->status === ClientStatus::Deactivated) {
+            return $this->error('Your account is deactivated. Please contact support.', 403);
         }
 
         $tokenName = 'api-'.$client->role->value;

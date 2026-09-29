@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ClientStatus;
 use App\Enums\Role;
 use App\Models\Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -29,6 +30,7 @@ class ClientFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'password' => static::$password ??= Hash::make('password'),
             'role' => Role::Owner,
+            'status' => ClientStatus::Active,
         ];
     }
 

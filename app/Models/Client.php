@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ClientStatus;
 use App\Enums\Role;
 use App\Notifications\ResetClientPassword;
 use Database\Factories\ClientFactory;
@@ -24,10 +25,11 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $email
  * @property string $password
  * @property Role $role
+ * @property ClientStatus $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'role'])]
+#[Fillable(['name', 'email', 'password', 'role', 'status'])]
 #[Hidden(['password'])]
 class Client extends Authenticatable
 {
@@ -53,6 +55,7 @@ class Client extends Authenticatable
         return [
             'password' => 'hashed',
             'role' => Role::class,
+            'status' => ClientStatus::class,
         ];
     }
 

@@ -8,11 +8,17 @@ use Illuminate\Http\Resources\Json\JsonResource;
 trait ApiResponse
 {
     /**
+     * @param  array<string, mixed>|null  $meta
      * @param  array<string, string>  $headers
      */
-    protected function success(mixed $data = null, string $message = 'Success.', int $status = 200, array $headers = []): JsonResponse
-    {
-        return $this->apiResponse($message, $data, $status, $headers);
+    protected function success(
+        mixed $data = null,
+        string $message = 'Success.',
+        int $status = 200,
+        ?array $meta = null,
+        array $headers = [],
+    ): JsonResponse {
+        return $this->apiResponse($message, $data, $status, $meta, $headers);
     }
 
     /**
@@ -27,10 +33,16 @@ trait ApiResponse
     }
 
     /**
+     * @param  array<string, mixed>|null  $meta
      * @param  array<string, string>  $headers
      */
-    protected function apiResponse(string $message, mixed $data, int $status, array $headers = []): JsonResponse
-    {
+    protected function apiResponse(
+        string $message,
+        mixed $data,
+        int $status,
+        ?array $meta = null,
+        array $headers = [],
+    ): JsonResponse {
         if ($data instanceof JsonResource) {
             $data = $data->resolve();
         }
@@ -42,6 +54,10 @@ trait ApiResponse
 
         if ($data !== null) {
             $payload['data'] = $data;
+        }
+
+        if ($meta !== null) {
+            $payload['meta'] = $meta;
         }
 
         return response()->json($payload, $status, $headers);

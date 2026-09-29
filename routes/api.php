@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\StudentClassEnrollment\StudentClassEnrollmentContro
 use App\Http\Controllers\Api\StudentSubject\StudentSubjectController;
 use App\Http\Controllers\Api\StudentTermResult\StudentTermResultController;
 use App\Http\Controllers\Api\Subject\SubjectController;
+use App\Http\Controllers\Api\Teacher\TeacherController;
 use App\Http\Controllers\Api\Term\TermController;
 use Illuminate\Support\Facades\Route;
 
@@ -99,6 +100,27 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/', [SubjectController::class, 'store'])
             ->name('api.schools.subjects.store');
+    });
+
+    // teacher routes
+    Route::prefix('schools/{school}/teachers')->middleware('abilities:permit:owner')->group(function () {
+        Route::get('/', [TeacherController::class, 'index'])
+            ->name('api.schools.teachers.index');
+
+        Route::post('/', [TeacherController::class, 'store'])
+            ->name('api.schools.teachers.store');
+
+        Route::get('/{teacher}', [TeacherController::class, 'show'])
+            ->name('api.schools.teachers.show');
+
+        Route::get('/{teacher}/subjects', [TeacherController::class, 'subjects'])
+            ->name('api.schools.teachers.subjects.index');
+
+        Route::put('/{teacher}', [TeacherController::class, 'update'])
+            ->name('api.schools.teachers.update');
+
+        Route::post('/{teacher}/reset-password', [TeacherController::class, 'resetPassword'])
+            ->name('api.schools.teachers.reset-password');
     });
 
     // class subject teacher routes

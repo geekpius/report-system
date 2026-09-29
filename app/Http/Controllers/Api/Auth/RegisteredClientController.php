@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
+use App\Enums\ClientStatus;
 use App\Enums\Role;
 use App\Enums\SchoolStatus;
 use App\Enums\SchoolType;
@@ -68,6 +69,7 @@ class RegisteredClientController extends Controller
                 'email' => $request->string('email'),
                 'password' => $request->string('password'),
                 'role' => Role::Owner,
+                'status' => ClientStatus::Active,
             ]);
 
             $school = School::create([
