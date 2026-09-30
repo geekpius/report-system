@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\Mark\MarkController;
 use App\Http\Controllers\Api\MarkSetting\MarkSettingController;
 use App\Http\Controllers\Api\School\SchoolController;
 use App\Http\Controllers\Api\SchoolClass\SchoolClassController;
+use App\Http\Controllers\Api\Student\StudentController;
 use App\Http\Controllers\Api\StudentClassEnrollment\StudentClassEnrollmentController;
 use App\Http\Controllers\Api\StudentSubject\StudentSubjectController;
 use App\Http\Controllers\Api\StudentTermResult\StudentTermResultController;
@@ -205,6 +206,24 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::put('/', [ExamMarkController::class, 'upsert'])
             ->name('api.schools.exam-marks.upsert');
+    });
+
+    // student routes
+    Route::prefix('schools/{school}/students')->middleware('abilities:permit:owner')->group(function () {
+        Route::get('/', [StudentController::class, 'index'])
+            ->name('api.schools.students.index');
+
+        Route::post('/', [StudentController::class, 'store'])
+            ->name('api.schools.students.store');
+
+        Route::get('/{student}', [StudentController::class, 'show'])
+            ->name('api.schools.students.show');
+
+        Route::put('/{student}', [StudentController::class, 'update'])
+            ->name('api.schools.students.update');
+
+        Route::get('/{student}/subjects', [StudentController::class, 'subjects'])
+            ->name('api.schools.students.subjects.index');
     });
 
     // student term result routes

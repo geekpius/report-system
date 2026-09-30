@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Api\Auth\Profile;
+namespace App\Http\Requests\Api\Student;
 
 use App\Enums\Gender;
 use App\Enums\Role;
 use App\Models\Client;
-use App\Models\SchoolClass;
+use App\Models\School;
 use App\Models\Student;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -13,18 +13,18 @@ use Illuminate\Validation\Rule;
 
 class UpdateStudentRequest extends FormRequest
 {
-    /**
-     * Determine if the client is authorized to update this student.
-     */
     public function authorize(): bool
     {
         $client = $this->user();
+        $school = $this->route('school');
         $student = $this->route('student');
 
         return $client instanceof Client
-            && $client->role === Role::Student
+            && $client->role === Role::Owner
+            && $school instanceof School
+            && $school->owner_id === $client->id
             && $student instanceof Student
-            && $student->client_id === $client->id;
+            && $student->school_id === $school->id;
     }
 
     /**
@@ -32,27 +32,12 @@ class UpdateStudentRequest extends FormRequest
      */
     public function rules(): array
     {
-        $student = $this->route('student');
-
         return [
             'firstName' => ['required', 'string', 'max:255'],
             'middleName' => ['nullable', 'string', 'max:255'],
             'lastName' => ['required', 'string', 'max:255'],
             'gender' => ['required', Rule::enum(Gender::class)],
-            'admissionNumber' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique(Student::class, 'admission_number')
-                    ->where('school_id', $student->school_id)
-                    ->ignore($student->id),
-            ],
             'dateOfBirth' => ['required', 'date', 'before:today'],
-            'schoolClassId' => [
-                'nullable',
-                'uuid',
-                Rule::exists(SchoolClass::class, 'id')->where('school_id', $student->school_id),
-            ],
         ];
     }
 }

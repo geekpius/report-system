@@ -22,6 +22,7 @@ class StudentResource extends JsonResource
             'schoolId' => $this->school_id,
             'schoolClassId' => $this->school_class_id,
             'firstName' => $this->first_name,
+            'middleName' => $this->middle_name,
             'lastName' => $this->last_name,
             'gender' => $this->gender->value,
             'admissionNumber' => $this->admission_number,
@@ -29,6 +30,8 @@ class StudentResource extends JsonResource
             'client' => new ClientResource($this->whenLoaded('client')),
             'school' => new SchoolResource($this->whenLoaded('school')),
             'schoolClass' => new SchoolClassResource($this->whenLoaded('schoolClass')),
+            'activeClassEnrollment' => new StudentClassEnrollmentResource($this->whenLoaded('activeClassEnrollment')),
+            'studentSubjects' => StudentSubjectResource::collection($this->whenLoaded('studentSubjects')),
         ];
     }
 }

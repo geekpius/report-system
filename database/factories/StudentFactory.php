@@ -23,6 +23,7 @@ class StudentFactory extends Factory
             'school_id' => School::factory(),
             'school_class_id' => null,
             'first_name' => fake()->firstName(),
+            'middle_name' => null,
             'last_name' => fake()->lastName(),
             'gender' => fake()->randomElement(Gender::cases()),
             'admission_number' => fake()->unique()->numerify('ADM-####'),

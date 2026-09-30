@@ -34,6 +34,7 @@ class UpdateStudentController extends Controller
                 required: ['firstName', 'lastName', 'gender', 'admissionNumber', 'dateOfBirth'],
                 properties: [
                     new OA\Property(property: 'firstName', type: 'string', maxLength: 255, example: 'Akosua'),
+                    new OA\Property(property: 'middleName', type: 'string', maxLength: 255, nullable: true, example: 'Ama'),
                     new OA\Property(property: 'lastName', type: 'string', maxLength: 255, example: 'Mensah'),
                     new OA\Property(property: 'gender', type: 'string', enum: ['male', 'female'], example: 'female'),
                     new OA\Property(property: 'admissionNumber', type: 'string', maxLength: 255, example: 'ADM-1001'),

@@ -21,6 +21,7 @@ use Illuminate\Support\Str;
  * @property string $school_id
  * @property string|null $school_class_id
  * @property string $first_name
+ * @property string|null $middle_name
  * @property string $last_name
  * @property Gender $gender
  * @property string $admission_number
@@ -33,6 +34,7 @@ use Illuminate\Support\Str;
     'school_id',
     'school_class_id',
     'first_name',
+    'middle_name',
     'last_name',
     'gender',
     'admission_number',
@@ -51,6 +53,17 @@ class Student extends Model
         return Attribute::make(
             get: fn (string $value): string => Str::title($value),
             set: fn (string $value): string => Str::squish($value),
+        );
+    }
+
+    /**
+     * @return Attribute<string|null, string|null>
+     */
+    protected function middleName(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value): ?string => $value === null ? null : Str::title($value),
+            set: fn (?string $value): ?string => $value === null ? null : Str::squish($value),
         );
     }
 

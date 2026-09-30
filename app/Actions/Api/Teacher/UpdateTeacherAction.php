@@ -33,7 +33,7 @@ class UpdateTeacherAction
         }
 
         return $this->success(
-            TeacherResource::make($teacher->load('client')),
+            TeacherResource::make($teacher),
             'Teacher updated successfully.',
         );
     }

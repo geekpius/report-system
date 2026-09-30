@@ -117,10 +117,18 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'schoolId', type: 'string', format: 'uuid'),
         new OA\Property(property: 'schoolClassId', type: 'string', format: 'uuid', nullable: true),
         new OA\Property(property: 'firstName', type: 'string', example: 'Akosua'),
+        new OA\Property(property: 'middleName', type: 'string', nullable: true, example: 'Ama'),
         new OA\Property(property: 'lastName', type: 'string', example: 'Mensah'),
         new OA\Property(property: 'gender', type: 'string', enum: ['male', 'female']),
         new OA\Property(property: 'admissionNumber', type: 'string', example: 'ADM-1001'),
         new OA\Property(property: 'dateOfBirth', type: 'string', format: 'date', example: '2012-04-15'),
+        new OA\Property(property: 'schoolClass', ref: '#/components/schemas/SchoolClass', nullable: true),
+        new OA\Property(property: 'activeClassEnrollment', ref: '#/components/schemas/StudentClassEnrollment', nullable: true),
+        new OA\Property(
+            property: 'studentSubjects',
+            type: 'array',
+            items: new OA\Items(ref: '#/components/schemas/StudentSubject')
+        ),
     ]
 )]
 #[OA\Schema(

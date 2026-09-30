@@ -881,6 +881,12 @@
                                         "example": "Akosua",
                                         "maxLength": 255
                                     },
+                                    "middleName": {
+                                        "type": "string",
+                                        "example": "Ama",
+                                        "nullable": true,
+                                        "maxLength": 255
+                                    },
                                     "lastName": {
                                         "type": "string",
                                         "example": "Mensah",
@@ -3838,6 +3844,552 @@
                 ]
             }
         },
+        "/schools/{school}/students": {
+            "get": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "List students for a school",
+                "description": "Returns a paginated list of students belonging to the authenticated owner's school.",
+                "operationId": "df6bdf7c5a9c32f9e4a381f783f4f833",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "perPage",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15,
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Students retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Students retrieved successfully."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Student"
+                                            }
+                                        },
+                                        "meta": {
+                                            "$ref": "#/components/schemas/PaginationMeta"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Admit a student",
+                "description": "Creates a student, enrolls them in a class for an academic year, auto-assigns mandatory subjects, and optionally assigns elective subjects.",
+                "operationId": "9d5f0cc1e714c3522e99ad2b7756e028",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "admissionNumber",
+                                    "firstName",
+                                    "lastName",
+                                    "gender",
+                                    "dateOfBirth",
+                                    "schoolClassId",
+                                    "academicYearId"
+                                ],
+                                "properties": {
+                                    "admissionNumber": {
+                                        "type": "string",
+                                        "example": "ADM-2026-001",
+                                        "maxLength": 255
+                                    },
+                                    "firstName": {
+                                        "type": "string",
+                                        "example": "John",
+                                        "maxLength": 255
+                                    },
+                                    "middleName": {
+                                        "type": "string",
+                                        "example": "Kwame",
+                                        "nullable": true,
+                                        "maxLength": 255
+                                    },
+                                    "lastName": {
+                                        "type": "string",
+                                        "example": "Doe",
+                                        "maxLength": 255
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "example": "male",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ]
+                                    },
+                                    "dateOfBirth": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2012-04-15"
+                                    },
+                                    "schoolClassId": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "academicYearId": {
+                                        "type": "string",
+                                        "format": "uuid"
+                                    },
+                                    "electiveSubjectIds": {
+                                        "description": "Optional. Only subjects offered as electives on the class menu can be selected.",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "uuid"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Student created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Student created successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Student"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/students/{student}": {
+            "get": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Get a student",
+                "description": "Returns a single student belonging to the authenticated owner's school.",
+                "operationId": "6b272127de32cfacd1e85444f28bb47a",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Student retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Student retrieved successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Student"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Update student information",
+                "description": "Updates student personal details for a school owned by the authenticated owner. Does not change class enrollment or subjects.",
+                "operationId": "0c197f2da1a117394f39b5424daf32fd",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "firstName",
+                                    "lastName",
+                                    "gender",
+                                    "dateOfBirth"
+                                ],
+                                "properties": {
+                                    "firstName": {
+                                        "type": "string",
+                                        "example": "John",
+                                        "maxLength": 255
+                                    },
+                                    "middleName": {
+                                        "type": "string",
+                                        "example": "Kwame",
+                                        "nullable": true,
+                                        "maxLength": 255
+                                    },
+                                    "lastName": {
+                                        "type": "string",
+                                        "example": "Doe",
+                                        "maxLength": 255
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "example": "male",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ]
+                                    },
+                                    "dateOfBirth": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2012-04-15"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Student updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Student updated successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Student"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/students/{student}/subjects": {
+            "get": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "List subjects a student is enrolled in",
+                "description": "Returns active subject enrollments for the student.",
+                "operationId": "6912340f215e8f5afa0b0d798a146678",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "student",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Student subjects retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Student subjects retrieved successfully."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/StudentSubject"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/schools/{school}/students/{student}/class-enrollments": {
             "get": {
                 "tags": [
@@ -5986,6 +6538,11 @@
                         "type": "string",
                         "example": "Akosua"
                     },
+                    "middleName": {
+                        "type": "string",
+                        "example": "Ama",
+                        "nullable": true
+                    },
                     "lastName": {
                         "type": "string",
                         "example": "Mensah"
@@ -6005,6 +6562,28 @@
                         "type": "string",
                         "format": "date",
                         "example": "2012-04-15"
+                    },
+                    "schoolClass": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/SchoolClass"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "activeClassEnrollment": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/StudentClassEnrollment"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "studentSubjects": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StudentSubject"
+                        }
                     }
                 },
                 "type": "object"
@@ -6803,6 +7382,10 @@
         {
             "name": "School Classes",
             "description": "School Classes"
+        },
+        {
+            "name": "Students",
+            "description": "Students"
         },
         {
             "name": "Student Class Enrollments",
