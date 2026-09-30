@@ -85,6 +85,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [SchoolClassController::class, 'store'])
             ->name('api.schools.classes.store');
 
+        Route::put('/{schoolClass}', [SchoolClassController::class, 'update'])
+            ->name('api.schools.classes.update');
+
+        Route::put('/{schoolClass}/status', [SchoolClassController::class, 'updateStatus'])
+            ->name('api.schools.classes.status');
+
         Route::prefix('{schoolClass}/subjects')->group(function () {
             Route::get('/', [ClassSubjectController::class, 'index'])
                 ->name('api.schools.classes.subjects.index');

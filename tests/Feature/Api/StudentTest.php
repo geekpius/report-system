@@ -73,7 +73,6 @@ class StudentTest extends TestCase
                 'gender' => Gender::Male->value,
                 'dateOfBirth' => '2012-04-15',
                 'schoolClassId' => $schoolClass->id,
-                'academicYearId' => $academicYear->id,
                 'electiveSubjectIds' => [$french->id, $ict->id],
             ])
             ->assertCreated()
@@ -127,7 +126,6 @@ class StudentTest extends TestCase
                 'gender' => Gender::Male->value,
                 'dateOfBirth' => '2012-04-15',
                 'schoolClassId' => $schoolClass->id,
-                'academicYearId' => $academicYear->id,
                 'electiveSubjectIds' => [$mathematics->id],
             ])
             ->assertUnprocessable()
@@ -353,7 +351,25 @@ class StudentTest extends TestCase
             'gender' => Gender::Male->value,
             'dateOfBirth' => '2012-04-15',
             'schoolClassId' => fake()->uuid(),
-            'academicYearId' => fake()->uuid(),
         ])->assertUnauthorized();
+    }
+
+    public function test_owners_cannot_admit_a_student_without_a_current_academic_year(): void
+    {
+        ['school' => $school, 'token' => $token] = $this->ownerContext();
+        $schoolClass = SchoolClass::factory()->create(['school_id' => $school->id]);
+
+        $this->withToken($token)
+            ->postJson(route('api.schools.students.store', $school), [
+                'admissionNumber' => 'ADM-2026-001',
+                'firstName' => 'John',
+                'lastName' => 'Doe',
+                'gender' => Gender::Male->value,
+                'dateOfBirth' => '2012-04-15',
+                'schoolClassId' => $schoolClass->id,
+            ])
+            ->assertUnprocessable()
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'No current academic year is set for this school.');
     }
 }

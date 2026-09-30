@@ -7,6 +7,7 @@ use App\Enums\EnrollmentStatus;
 use App\Enums\StudentSubjectStatus;
 use App\Http\Requests\Api\Student\StoreStudentRequest;
 use App\Http\Resources\StudentResource;
+use App\Models\AcademicYear;
 use App\Models\ClassSubject;
 use App\Models\School;
 use App\Models\Student;
@@ -22,8 +23,17 @@ class StoreStudentAction
 
     public function handle(StoreStudentRequest $request, School $school): JsonResponse
     {
+        $academicYear = AcademicYear::query()
+            ->where('school_id', $school->id)
+            ->where('is_current', true)
+            ->first();
+
+        if ($academicYear === null) {
+            return $this->error('No current academic year is set for this school.', 422);
+        }
+
         try {
-            $student = DB::transaction(function () use ($request, $school): Student {
+            $student = DB::transaction(function () use ($request, $school, $academicYear): Student {
                 $student = Student::query()->create([
                     'school_id' => $school->id,
                     'school_class_id' => $request->validated('schoolClassId'),
@@ -38,7 +48,7 @@ class StoreStudentAction
                 $enrollment = StudentClassEnrollment::query()->create([
                     'student_id' => $student->id,
                     'school_class_id' => $request->validated('schoolClassId'),
-                    'academic_year_id' => $request->validated('academicYearId'),
+                    'academic_year_id' => $academicYear->id,
                     'status' => EnrollmentStatus::Active,
                     'started_at' => now(),
                 ]);

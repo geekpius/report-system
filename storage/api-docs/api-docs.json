@@ -3770,11 +3770,6 @@
                                         "example": "Form 1",
                                         "nullable": true,
                                         "maxLength": 255
-                                    },
-                                    "classTeacherId": {
-                                        "type": "string",
-                                        "format": "uuid",
-                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -3796,6 +3791,235 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Class created successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/SchoolClass"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/classes/{schoolClass}": {
+            "put": {
+                "tags": [
+                    "School Classes"
+                ],
+                "summary": "Update a school class",
+                "description": "Updates class name and alias. Use the status endpoint to change status.",
+                "operationId": "9492a4615271f5a05c36c7637cbc6e54",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "schoolClass",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "JHS 1A",
+                                        "maxLength": 255
+                                    },
+                                    "alias": {
+                                        "type": "string",
+                                        "example": "Form 1",
+                                        "nullable": true,
+                                        "maxLength": 255
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Class updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Class updated successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/SchoolClass"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/classes/{schoolClass}/status": {
+            "put": {
+                "tags": [
+                    "School Classes"
+                ],
+                "summary": "Update school class status",
+                "description": "Updates the status of a class belonging to a school owned by the authenticated owner.",
+                "operationId": "f54a860edf22f6de6bfd1e87bb334b2d",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "schoolClass",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "inactive",
+                                        "enum": [
+                                            "active",
+                                            "inactive"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Class status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Class is now inactive."
                                         },
                                         "data": {
                                             "$ref": "#/components/schemas/SchoolClass"
@@ -3946,7 +4170,7 @@
                     "Students"
                 ],
                 "summary": "Admit a student",
-                "description": "Creates a student, enrolls them in a class for an academic year, auto-assigns mandatory subjects, and optionally assigns elective subjects.",
+                "description": "Creates a student, enrolls them in a class for the school's current academic year, auto-assigns mandatory subjects, and optionally assigns elective subjects.",
                 "operationId": "9d5f0cc1e714c3522e99ad2b7756e028",
                 "parameters": [
                     {
@@ -3970,8 +4194,7 @@
                                     "lastName",
                                     "gender",
                                     "dateOfBirth",
-                                    "schoolClassId",
-                                    "academicYearId"
+                                    "schoolClassId"
                                 ],
                                 "properties": {
                                     "admissionNumber": {
@@ -4009,10 +4232,6 @@
                                         "example": "2012-04-15"
                                     },
                                     "schoolClassId": {
-                                        "type": "string",
-                                        "format": "uuid"
-                                    },
-                                    "academicYearId": {
                                         "type": "string",
                                         "format": "uuid"
                                     },
@@ -6611,6 +6830,14 @@
                         "type": "string",
                         "format": "uuid",
                         "nullable": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "active",
+                        "enum": [
+                            "active",
+                            "inactive"
+                        ]
                     },
                     "classTeacher": {
                         "oneOf": [

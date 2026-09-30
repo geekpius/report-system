@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('alias')->nullable();
             $table->foreignUuid('class_teacher_id')->nullable()->constrained('teachers')->nullOnDelete();
+            $table->string('status')->default('active');
             $table->timestamps();
         });
     }

@@ -4,7 +4,6 @@ namespace App\Http\Requests\Api\Student;
 
 use App\Enums\Gender;
 use App\Enums\Role;
-use App\Models\AcademicYear;
 use App\Models\ClassSubject;
 use App\Models\Client;
 use App\Models\School;
@@ -52,11 +51,6 @@ class StoreStudentRequest extends FormRequest
                 'required',
                 'uuid',
                 Rule::exists(SchoolClass::class, 'id')->where('school_id', $school->id),
-            ],
-            'academicYearId' => [
-                'required',
-                'uuid',
-                Rule::exists(AcademicYear::class, 'id')->where('school_id', $school->id),
             ],
             'electiveSubjectIds' => ['sometimes', 'array'],
             'electiveSubjectIds.*' => [

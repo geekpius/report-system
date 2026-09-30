@@ -3,6 +3,7 @@
 namespace App\Actions\Api\SchoolClass;
 
 use App\Concerns\ApiResponse;
+use App\Enums\SchoolClassStatus;
 use App\Http\Requests\Api\SchoolClass\StoreSchoolClassRequest;
 use App\Http\Resources\SchoolClassResource;
 use App\Models\School;
@@ -19,6 +20,7 @@ class StoreSchoolClassAction
         try {
             $class = SchoolClass::query()->create([
                 'school_id' => $school->id,
+                'status' => SchoolClassStatus::Active,
                 ...snake_keys($request->validated()),
             ]);
         } catch (Throwable $exception) {
@@ -28,7 +30,7 @@ class StoreSchoolClassAction
         }
 
         return $this->success(
-            SchoolClassResource::make($class->load('classTeacher')),
+            SchoolClassResource::make($class),
             'Class created successfully.',
             201,
         );

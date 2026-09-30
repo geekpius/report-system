@@ -139,6 +139,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'name', type: 'string', example: 'JHS 1A'),
         new OA\Property(property: 'alias', type: 'string', nullable: true, example: 'Form 1'),
         new OA\Property(property: 'classTeacherId', type: 'string', format: 'uuid', nullable: true),
+        new OA\Property(property: 'status', type: 'string', enum: ['active', 'inactive'], example: 'active'),
         new OA\Property(property: 'classTeacher', ref: '#/components/schemas/Teacher', nullable: true),
     ]
 )]

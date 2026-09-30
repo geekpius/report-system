@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\SchoolClassStatus;
 use App\Models\School;
 use App\Models\SchoolClass;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,6 +21,7 @@ class SchoolClassFactory extends Factory
             'school_id' => School::factory(),
             'name' => fake()->randomElement(['JHS 1A', 'JHS 1B', 'JHS 2A', 'JHS 2B', 'JHS 3A']),
             'class_teacher_id' => null,
+            'status' => SchoolClassStatus::Active,
         ];
     }
 }

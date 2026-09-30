@@ -56,7 +56,7 @@ class StudentController extends Controller
     #[OA\Post(
         path: '/schools/{school}/students',
         summary: 'Admit a student',
-        description: 'Creates a student, enrolls them in a class for an academic year, auto-assigns mandatory subjects, and optionally assigns elective subjects.',
+        description: 'Creates a student, enrolls them in a class for the school\'s current academic year, auto-assigns mandatory subjects, and optionally assigns elective subjects.',
         security: [['sanctum' => []]],
         tags: ['Students'],
         parameters: [
@@ -65,7 +65,7 @@ class StudentController extends Controller
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ['admissionNumber', 'firstName', 'lastName', 'gender', 'dateOfBirth', 'schoolClassId', 'academicYearId'],
+                required: ['admissionNumber', 'firstName', 'lastName', 'gender', 'dateOfBirth', 'schoolClassId'],
                 properties: [
                     new OA\Property(property: 'admissionNumber', type: 'string', maxLength: 255, example: 'ADM-2026-001'),
                     new OA\Property(property: 'firstName', type: 'string', maxLength: 255, example: 'John'),
@@ -74,7 +74,6 @@ class StudentController extends Controller
                     new OA\Property(property: 'gender', type: 'string', enum: ['male', 'female'], example: 'male'),
                     new OA\Property(property: 'dateOfBirth', type: 'string', format: 'date', example: '2012-04-15'),
                     new OA\Property(property: 'schoolClassId', type: 'string', format: 'uuid'),
-                    new OA\Property(property: 'academicYearId', type: 'string', format: 'uuid'),
                     new OA\Property(
                         property: 'electiveSubjectIds',
                         type: 'array',

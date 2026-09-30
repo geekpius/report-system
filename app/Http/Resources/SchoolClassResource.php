@@ -22,6 +22,7 @@ class SchoolClassResource extends JsonResource
             'name' => $this->name,
             'alias' => $this->alias,
             'classTeacherId' => $this->class_teacher_id,
+            'status' => $this->status->value,
             'school' => new SchoolResource($this->whenLoaded('school')),
             'classTeacher' => new TeacherResource($this->whenLoaded('classTeacher')),
             'students' => StudentResource::collection($this->whenLoaded('students')),

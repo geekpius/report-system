@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Api;
 
+use App\Enums\SchoolClassStatus;
 use App\Models\Client;
 use App\Models\School;
 use App\Models\SchoolClass;
-use App\Models\Teacher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,44 +17,26 @@ class SchoolClassTest extends TestCase
     {
         $owner = Client::factory()->owner()->create();
         $school = School::factory()->for($owner, 'owner')->create();
-        $teacher = Teacher::factory()->create(['school_id' => $school->id]);
         $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
 
         $this->withToken($token)
             ->postJson(route('api.schools.classes.store', $school), [
                 'name' => 'JHS 1A',
                 'alias' => 'Form 1',
-                'class_teacher_id' => $teacher->id,
             ])
             ->assertCreated()
             ->assertJsonPath('success', true)
             ->assertJsonPath('data.name', 'JHS 1A')
             ->assertJsonPath('data.alias', 'Form 1')
             ->assertJsonPath('data.schoolId', $school->id)
-            ->assertJsonPath('data.classTeacherId', $teacher->id);
+            ->assertJsonPath('data.status', 'active');
 
         $this->assertDatabaseHas('school_classes', [
             'name' => 'JHS 1A',
             'alias' => 'Form 1',
             'school_id' => $school->id,
-            'class_teacher_id' => $teacher->id,
+            'status' => 'active',
         ]);
-    }
-
-    public function test_owners_cannot_assign_a_teacher_from_another_school(): void
-    {
-        $owner = Client::factory()->owner()->create();
-        $school = School::factory()->for($owner, 'owner')->create();
-        $otherTeacher = Teacher::factory()->create();
-        $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
-
-        $this->withToken($token)
-            ->postJson(route('api.schools.classes.store', $school), [
-                'name' => 'JHS 1A',
-                'class_teacher_id' => $otherTeacher->id,
-            ])
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors(['class_teacher_id']);
     }
 
     public function test_owners_can_list_classes_for_their_school(): void
@@ -73,6 +55,79 @@ class SchoolClassTest extends TestCase
             ->assertJsonCount(2, 'data')
             ->assertJsonPath('data.0.name', 'JHS 1A')
             ->assertJsonPath('data.1.name', 'JHS 1B');
+    }
+
+    public function test_owners_can_update_a_class_for_their_school(): void
+    {
+        $owner = Client::factory()->owner()->create();
+        $school = School::factory()->for($owner, 'owner')->create();
+        $schoolClass = SchoolClass::factory()->create([
+            'school_id' => $school->id,
+            'name' => 'JHS 1A',
+            'alias' => 'Form 1',
+        ]);
+        $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
+
+        $this->withToken($token)
+            ->putJson(route('api.schools.classes.update', [$school, $schoolClass]), [
+                'name' => 'JHS 1B',
+                'alias' => 'Form 1B',
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.name', 'JHS 1B')
+            ->assertJsonPath('data.alias', 'Form 1B')
+            ->assertJsonPath('data.status', SchoolClassStatus::Active->value);
+
+        $this->assertDatabaseHas('school_classes', [
+            'id' => $schoolClass->id,
+            'name' => 'JHS 1B',
+            'alias' => 'Form 1B',
+            'status' => SchoolClassStatus::Active->value,
+        ]);
+    }
+
+    public function test_owners_can_update_a_class_status(): void
+    {
+        $owner = Client::factory()->owner()->create();
+        $school = School::factory()->for($owner, 'owner')->create();
+        $schoolClass = SchoolClass::factory()->create([
+            'school_id' => $school->id,
+            'status' => SchoolClassStatus::Active,
+        ]);
+        $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
+
+        $this->withToken($token)
+            ->putJson(route('api.schools.classes.status', [$school, $schoolClass]), [
+                'status' => SchoolClassStatus::Inactive->value,
+            ])
+            ->assertOk()
+            ->assertJsonPath('message', 'Class is now inactive.')
+            ->assertJsonPath('data.status', SchoolClassStatus::Inactive->value);
+
+        $this->assertDatabaseHas('school_classes', [
+            'id' => $schoolClass->id,
+            'status' => SchoolClassStatus::Inactive->value,
+        ]);
+    }
+
+    public function test_owners_cannot_update_classes_from_another_school(): void
+    {
+        $owner = Client::factory()->owner()->create();
+        $school = School::factory()->for($owner, 'owner')->create();
+        $otherClass = SchoolClass::factory()->create();
+        $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
+
+        $this->withToken($token)
+            ->putJson(route('api.schools.classes.update', [$school, $otherClass]), [
+                'name' => 'JHS 1B',
+            ])
+            ->assertForbidden();
+
+        $this->withToken($token)
+            ->putJson(route('api.schools.classes.status', [$school, $otherClass]), [
+                'status' => SchoolClassStatus::Inactive->value,
+            ])
+            ->assertForbidden();
     }
 
     public function test_owners_cannot_manage_classes_for_another_school(): void
@@ -118,6 +173,16 @@ class SchoolClassTest extends TestCase
 
         $this->postJson(route('api.schools.classes.store', $school), [
             'name' => 'JHS 1A',
+        ])->assertUnauthorized();
+
+        $schoolClass = SchoolClass::factory()->create(['school_id' => $school->id]);
+
+        $this->putJson(route('api.schools.classes.update', [$school, $schoolClass]), [
+            'name' => 'JHS 1B',
+        ])->assertUnauthorized();
+
+        $this->putJson(route('api.schools.classes.status', [$school, $schoolClass]), [
+            'status' => SchoolClassStatus::Inactive->value,
         ])->assertUnauthorized();
     }
 

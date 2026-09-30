@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SchoolClassStatus;
 use Database\Factories\SchoolClassFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
@@ -18,10 +20,11 @@ use Illuminate\Support\Str;
  * @property string $name
  * @property string|null $alias
  * @property string|null $class_teacher_id
+ * @property SchoolClassStatus $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['school_id', 'name', 'alias', 'class_teacher_id'])]
+#[Fillable(['school_id', 'name', 'alias', 'class_teacher_id', 'status'])]
 class SchoolClass extends Model
 {
     /** @use HasFactory<SchoolClassFactory> */
@@ -36,6 +39,26 @@ class SchoolClass extends Model
             get: fn (?string $value): ?string => $value === null ? null : Str::title($value),
             set: fn (?string $value): ?string => $value === null ? null : Str::squish($value),
         );
+    }
+
+    /**
+     * @return Attribute<string, string>
+     */
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            set: fn (string $value): string => Str::upper($value),
+        );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => SchoolClassStatus::class,
+        ];
     }
 
     /**
