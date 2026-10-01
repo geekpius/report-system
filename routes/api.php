@@ -107,6 +107,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/', [SubjectController::class, 'store'])
             ->name('api.schools.subjects.store');
+
+        Route::put('/{subject}', [SubjectController::class, 'update'])
+            ->name('api.schools.subjects.update');
+
+        Route::put('/{subject}/status', [SubjectController::class, 'updateStatus'])
+            ->name('api.schools.subjects.status');
     });
 
     // teacher routes
@@ -143,6 +149,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('schools/{school}/academic-years')->middleware('abilities:permit:owner')->group(function () {
         Route::get('/', [AcademicYearController::class, 'index'])
             ->name('api.schools.academic-years.index');
+
+        Route::get('/current', [AcademicYearController::class, 'current'])
+            ->name('api.schools.academic-years.current');
 
         Route::post('/', [AcademicYearController::class, 'store'])
             ->name('api.schools.academic-years.store');

@@ -3,6 +3,7 @@
 namespace App\Actions\Api\Subject;
 
 use App\Concerns\ApiResponse;
+use App\Enums\SubjectStatus;
 use App\Http\Requests\Api\Subject\StoreSubjectRequest;
 use App\Http\Resources\SubjectResource;
 use App\Models\School;
@@ -19,6 +20,7 @@ class StoreSubjectAction
         try {
             $subject = Subject::query()->create([
                 'school_id' => $school->id,
+                'status' => SubjectStatus::Active,
                 ...snake_keys($request->validated()),
             ]);
         } catch (Throwable $exception) {

@@ -87,7 +87,7 @@ class AuthenticatedSessionController extends Controller
             now()->addMinutes((int) config('sanctum.expiration', 60 * 24)),
         )->plainTextToken;
 
-        $client->load('schools');
+        $client->load('schools.currentAcademicYear.terms');
 
         return $this->success([
             'token' => $token,
@@ -126,7 +126,7 @@ class AuthenticatedSessionController extends Controller
     )]
     public function show(Request $request): JsonResponse
     {
-        $client = $request->user()->load('schools');
+        $client = $request->user()->load('schools.currentAcademicYear.terms');
 
         return $this->success(
             ClientResource::make($client),

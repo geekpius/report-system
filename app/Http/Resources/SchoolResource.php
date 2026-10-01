@@ -36,6 +36,7 @@ class SchoolResource extends JsonResource
             'students' => StudentResource::collection($this->whenLoaded('students')),
             'classes' => SchoolClassResource::collection($this->whenLoaded('classes')),
             'subjects' => SubjectResource::collection($this->whenLoaded('subjects')),
+            'currentAcademicYear' => new AcademicYearResource($this->whenLoaded('currentAcademicYear')),
         ];
     }
 }

@@ -139,4 +139,48 @@ class AcademicYearTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['name', 'startsOn', 'endsOn']);
     }
+
+    public function test_owners_can_fetch_the_current_academic_year(): void
+    {
+        $owner = Client::factory()->owner()->create();
+        $school = School::factory()->for($owner, 'owner')->create();
+        $current = AcademicYear::factory()->current()->create([
+            'school_id' => $school->id,
+            'name' => '2025/2026',
+            'starts_on' => '2025-09-01',
+            'ends_on' => '2026-07-31',
+        ]);
+        AcademicYear::factory()->create([
+            'school_id' => $school->id,
+            'name' => '2024/2025',
+        ]);
+        Term::factory()->create([
+            'academic_year_id' => $current->id,
+            'name' => 'Term 1',
+            'number' => 1,
+        ]);
+        $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
+
+        $this->withToken($token)
+            ->getJson(route('api.schools.academic-years.current', $school))
+            ->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.id', $current->id)
+            ->assertJsonPath('data.name', '2025/2026')
+            ->assertJsonPath('data.isCurrent', true)
+            ->assertJsonCount(1, 'data.terms');
+    }
+
+    public function test_fetching_current_academic_year_returns_404_when_none_is_set(): void
+    {
+        $owner = Client::factory()->owner()->create();
+        $school = School::factory()->for($owner, 'owner')->create();
+        AcademicYear::factory()->create(['school_id' => $school->id]);
+        $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
+
+        $this->withToken($token)
+            ->getJson(route('api.schools.academic-years.current', $school))
+            ->assertNotFound()
+            ->assertJsonPath('success', false);
+    }
 }

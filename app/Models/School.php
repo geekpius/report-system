@@ -137,6 +137,14 @@ class School extends Model
     }
 
     /**
+     * @return HasOne<AcademicYear, $this>
+     */
+    public function currentAcademicYear(): HasOne
+    {
+        return $this->hasOne(AcademicYear::class)->where('is_current', true);
+    }
+
+    /**
      * @return HasMany<Aggregate, $this>
      */
     public function aggregates(): HasMany

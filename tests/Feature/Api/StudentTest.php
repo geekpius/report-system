@@ -181,12 +181,21 @@ class StudentTest extends TestCase
     {
         ['school' => $school, 'token' => $token] = $this->ownerContext();
         $schoolClass = SchoolClass::factory()->create(['school_id' => $school->id, 'name' => 'JHS 1A']);
+        $academicYear = AcademicYear::factory()->current()->create([
+            'school_id' => $school->id,
+            'name' => '2025/2026',
+        ]);
         $student = Student::factory()->create([
             'school_id' => $school->id,
             'school_class_id' => $schoolClass->id,
             'first_name' => 'John',
             'last_name' => 'Doe',
             'admission_number' => 'ADM-2026-001',
+        ]);
+        $enrollment = StudentClassEnrollment::factory()->create([
+            'student_id' => $student->id,
+            'school_class_id' => $schoolClass->id,
+            'academic_year_id' => $academicYear->id,
         ]);
 
         $this->withToken($token)
@@ -197,8 +206,10 @@ class StudentTest extends TestCase
             ->assertJsonPath('data.firstName', 'John')
             ->assertJsonPath('data.lastName', 'Doe')
             ->assertJsonPath('data.schoolClassId', $schoolClass->id)
-            ->assertJsonMissingPath('data.schoolClass')
-            ->assertJsonMissingPath('data.activeClassEnrollment');
+            ->assertJsonPath('data.activeClassEnrollment.id', $enrollment->id)
+            ->assertJsonPath('data.activeClassEnrollment.schoolClass.name', 'JHS 1A')
+            ->assertJsonPath('data.activeClassEnrollment.academicYear.name', '2025/2026')
+            ->assertJsonMissingPath('data.schoolClass');
     }
 
     public function test_owners_cannot_show_students_from_another_school(): void

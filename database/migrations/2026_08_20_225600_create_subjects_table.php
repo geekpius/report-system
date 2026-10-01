@@ -14,9 +14,12 @@ return new class extends Migration
         Schema::create('subjects', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('school_id')->constrained('schools')->cascadeOnDelete();
+            $table->string('code');
             $table->string('name');
+            $table->string('status')->default('active');
             $table->timestamps();
 
+            $table->unique(['school_id', 'code']);
             $table->unique(['school_id', 'name']);
         });
     }

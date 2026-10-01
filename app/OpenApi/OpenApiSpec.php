@@ -73,6 +73,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'status', type: 'string', enum: ['active', 'archived'], example: 'active'),
         new OA\Property(property: 'inSession', type: 'boolean', example: false),
         new OA\Property(property: 'ownerId', type: 'string', format: 'uuid'),
+        new OA\Property(property: 'currentAcademicYear', ref: '#/components/schemas/AcademicYear', nullable: true),
     ]
 )]
 #[OA\Schema(
@@ -149,6 +150,8 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'id', type: 'string', format: 'uuid'),
         new OA\Property(property: 'schoolId', type: 'string', format: 'uuid'),
         new OA\Property(property: 'name', type: 'string', example: 'Mathematics'),
+        new OA\Property(property: 'code', type: 'string', example: 'MATH'),
+        new OA\Property(property: 'status', type: 'string', enum: ['active', 'inactive'], example: 'active'),
     ]
 )]
 #[OA\Schema(

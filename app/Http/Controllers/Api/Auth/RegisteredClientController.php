@@ -97,7 +97,7 @@ class RegisteredClientController extends Controller
             now()->addMinutes((int) config('sanctum.expiration', 60 * 24)),
         )->plainTextToken;
 
-        $client->load('schools');
+        $client->load('schools.currentAcademicYear.terms');
 
         return $this->success([
             'token' => $token,

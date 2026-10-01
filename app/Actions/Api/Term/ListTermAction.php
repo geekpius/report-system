@@ -16,7 +16,7 @@ class ListTermAction
         $terms = $academicYear->terms()->orderBy('number')->get();
 
         return $this->success(
-            TermResource::collection($terms),
+            TermResource::collection($terms->load('academicYear')),
             'Terms retrieved successfully.',
         );
     }

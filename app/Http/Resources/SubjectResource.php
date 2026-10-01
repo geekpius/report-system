@@ -20,6 +20,8 @@ class SubjectResource extends JsonResource
             'id' => $this->id,
             'schoolId' => $this->school_id,
             'name' => $this->name,
+            'code' => $this->code,
+            'status' => $this->status->value,
             'school' => new SchoolResource($this->whenLoaded('school')),
         ];
     }

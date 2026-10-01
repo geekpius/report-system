@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\AcademicYear;
 
 use App\Actions\Api\AcademicYear\ListAcademicYearAction;
+use App\Actions\Api\AcademicYear\ShowCurrentAcademicYearAction;
 use App\Actions\Api\AcademicYear\StoreAcademicYearAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\AcademicYear\ListAcademicYearRequest;
+use App\Http\Requests\Api\AcademicYear\ShowCurrentAcademicYearRequest;
 use App\Http\Requests\Api\AcademicYear\StoreAcademicYearRequest;
 use App\Models\School;
 use Illuminate\Http\JsonResponse;
@@ -41,6 +43,39 @@ class AcademicYearController extends Controller
         ListAcademicYearRequest $request,
         School $school,
         ListAcademicYearAction $action,
+    ): JsonResponse {
+        return $action->handle($school);
+    }
+
+    #[OA\Get(
+        path: '/schools/{school}/academic-years/current',
+        summary: 'Get the current academic year',
+        security: [['sanctum' => []]],
+        tags: ['Academic Years'],
+        parameters: [
+            new OA\Parameter(name: 'school', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Current academic year retrieved successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Current academic year retrieved successfully.'),
+                        new OA\Property(property: 'data', ref: '#/components/schemas/AcademicYear'),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
+            new OA\Response(response: 403, description: 'Forbidden', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
+            new OA\Response(response: 404, description: 'No current academic year', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
+        ]
+    )]
+    public function current(
+        ShowCurrentAcademicYearRequest $request,
+        School $school,
+        ShowCurrentAcademicYearAction $action,
     ): JsonResponse {
         return $action->handle($school);
     }

@@ -14,7 +14,10 @@ class ShowStudentAction
     public function handle(Student $student): JsonResponse
     {
         return $this->success(
-            StudentResource::make($student),
+            StudentResource::make($student->load([
+                'activeClassEnrollment.schoolClass',
+                'activeClassEnrollment.academicYear',
+            ])),
             'Student retrieved successfully.',
         );
     }

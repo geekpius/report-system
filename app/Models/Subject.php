@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SubjectStatus;
 use Database\Factories\SubjectFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -17,10 +18,12 @@ use Illuminate\Support\Str;
  * @property string $id
  * @property string $school_id
  * @property string $name
+ * @property string $code
+ * @property SubjectStatus $status
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['school_id', 'name'])]
+#[Fillable(['school_id', 'name', 'code', 'status'])]
 class Subject extends Model
 {
     /** @use HasFactory<SubjectFactory> */
@@ -35,6 +38,27 @@ class Subject extends Model
             get: fn (string $value): string => Str::title($value),
             set: fn (string $value): string => Str::squish($value),
         );
+    }
+
+    /**
+     * @return Attribute<string, string>
+     */
+    protected function code(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value): string => Str::upper($value),
+            set: fn (string $value): string => Str::upper(Str::squish($value)),
+        );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => SubjectStatus::class,
+        ];
     }
 
     /**

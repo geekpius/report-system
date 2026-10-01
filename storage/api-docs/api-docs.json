@@ -199,6 +199,86 @@
                 ]
             }
         },
+        "/schools/{school}/academic-years/current": {
+            "get": {
+                "tags": [
+                    "Academic Years"
+                ],
+                "summary": "Get the current academic year",
+                "operationId": "fc292a4707b0926c7332c1c36837558a",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Current academic year retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Current academic year retrieved successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/AcademicYear"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No current academic year",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/schools/{school}/aggregates": {
             "get": {
                 "tags": [
@@ -5244,13 +5324,19 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "name"
+                                    "name",
+                                    "code"
                                 ],
                                 "properties": {
                                     "name": {
                                         "type": "string",
                                         "example": "Mathematics",
                                         "maxLength": 255
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "MATH",
+                                        "maxLength": 50
                                     }
                                 },
                                 "type": "object"
@@ -5272,6 +5358,235 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Subject created successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Subject"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/subjects/{subject}": {
+            "put": {
+                "tags": [
+                    "Subjects"
+                ],
+                "summary": "Update a subject",
+                "description": "Updates subject name and code. Use the status endpoint to change status.",
+                "operationId": "e6e02ff95fbe27e0654c71c73c5fbaf2",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "code"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Further Mathematics",
+                                        "maxLength": 255
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "example": "FMATH",
+                                        "maxLength": 50
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Subject updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Subject updated successfully."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Subject"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/schools/{school}/subjects/{subject}/status": {
+            "put": {
+                "tags": [
+                    "Subjects"
+                ],
+                "summary": "Update subject status",
+                "description": "Updates the status of a subject belonging to a school owned by the authenticated owner.",
+                "operationId": "2cd491540d6cd6afd1d07618ab2e3d25",
+                "parameters": [
+                    {
+                        "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "subject",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "inactive",
+                                        "enum": [
+                                            "active",
+                                            "inactive"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Subject status updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Subject is now inactive."
                                         },
                                         "data": {
                                             "$ref": "#/components/schemas/Subject"
@@ -6638,6 +6953,14 @@
                     "ownerId": {
                         "type": "string",
                         "format": "uuid"
+                    },
+                    "currentAcademicYear": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/AcademicYear"
+                            }
+                        ],
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -6863,6 +7186,18 @@
                     "name": {
                         "type": "string",
                         "example": "Mathematics"
+                    },
+                    "code": {
+                        "type": "string",
+                        "example": "MATH"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "active",
+                        "enum": [
+                            "active",
+                            "inactive"
+                        ]
                     }
                 },
                 "type": "object"
