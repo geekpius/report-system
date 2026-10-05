@@ -3,6 +3,7 @@
 namespace App\Actions\Api\MarkSetting;
 
 use App\Concerns\ApiResponse;
+use App\Enums\ScoringMode;
 use App\Http\Requests\Api\MarkSetting\UpdateMarkSettingRequest;
 use App\Http\Resources\MarkSettingResource;
 use App\Models\MarkSetting;
@@ -16,19 +17,33 @@ class UpdateMarkSettingAction
 
     public function handle(UpdateMarkSettingRequest $request, School $school): JsonResponse
     {
-        $setting = MarkSetting::resolveForSchool($school);
+        $setting = $school->markSetting;
+
+        if ($setting === null) {
+            $setting = $school->markSetting()->create(MarkSetting::defaults());
+        }
+
+        $scoringMode = ScoringMode::from($request->string('scoringMode')->toString());
+
+        $attributes = [
+            'scoring_mode' => $scoringMode,
+        ];
+
+        if ($scoringMode === ScoringMode::TotalScore) {
+            $attributes['class_score_percent'] = $request->input('totalScore.classScorePercent');
+            $attributes['exam_score_percent'] = $request->input('totalScore.examScorePercent');
+        }
+
+        if ($scoringMode === ScoringMode::DivisionScore) {
+            $attributes['class_score_max'] = $request->input('divisionScore.classScoreMax');
+            $attributes['home_assignment_max'] = $request->input('divisionScore.homeAssignmentMax');
+            $attributes['project_max'] = $request->input('divisionScore.projectMax');
+            $attributes['class_test_max'] = $request->input('divisionScore.classTestMax');
+            $attributes['exam_allocation_percent'] = $request->input('divisionScore.examAllocationPercent');
+        }
 
         try {
-            $setting->update([
-                'scoring_mode' => $request->input('scoringMode'),
-                'class_score_percent' => $request->input('totalScore.classScorePercent'),
-                'exam_score_percent' => $request->input('totalScore.examScorePercent'),
-                'class_score_max' => $request->input('divisionScore.classScoreMax'),
-                'home_assignment_max' => $request->input('divisionScore.homeAssignmentMax'),
-                'project_max' => $request->input('divisionScore.projectMax'),
-                'class_test_max' => $request->input('divisionScore.classTestMax'),
-                'exam_allocation_percent' => $request->input('divisionScore.examAllocationPercent'),
-            ]);
+            $setting->update($attributes);
         } catch (Throwable $exception) {
             report($exception);
 

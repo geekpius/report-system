@@ -3073,7 +3073,7 @@
                     "Mark Settings"
                 ],
                 "summary": "Update mark settings",
-                "description": "Updates the active scoring mode and both total-score and division-score configurations. divisionTotal and divisionTotalPercent are derived by the backend.",
+                "description": "Updates the active scoring mode and the configuration for that mode only. Send totalScore when scoringMode is total_score, or divisionScore when scoringMode is division_score. divisionTotal and divisionTotalPercent are derived by the backend.",
                 "operationId": "7c3c2d9ba637fbdd5ba18609cd91d020",
                 "parameters": [
                     {
@@ -3092,16 +3092,19 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "scoringMode",
-                                    "totalScore",
-                                    "divisionScore"
+                                    "scoringMode"
                                 ],
                                 "properties": {
                                     "scoringMode": {
                                         "type": "string",
-                                        "example": "total_score"
+                                        "example": "total_score",
+                                        "enum": [
+                                            "total_score",
+                                            "division_score"
+                                        ]
                                     },
                                     "totalScore": {
+                                        "description": "Required when scoringMode is total_score.",
                                         "required": [
                                             "classScorePercent",
                                             "examScorePercent"
@@ -3125,6 +3128,7 @@
                                         "type": "object"
                                     },
                                     "divisionScore": {
+                                        "description": "Required when scoringMode is division_score.",
                                         "required": [
                                             "classScoreMax",
                                             "homeAssignmentMax",

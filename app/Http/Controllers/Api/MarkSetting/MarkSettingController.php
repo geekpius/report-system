@@ -46,7 +46,7 @@ class MarkSettingController extends Controller
     #[OA\Put(
         path: '/schools/{school}/mark-settings',
         summary: 'Update mark settings',
-        description: 'Updates the active scoring mode and both total-score and division-score configurations. divisionTotal and divisionTotalPercent are derived by the backend.',
+        description: 'Updates the active scoring mode and the configuration for that mode only. Send totalScore when scoringMode is total_score, or divisionScore when scoringMode is division_score. divisionTotal and divisionTotalPercent are derived by the backend.',
         security: [['sanctum' => []]],
         tags: ['Mark Settings'],
         parameters: [
@@ -55,11 +55,12 @@ class MarkSettingController extends Controller
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ['scoringMode', 'totalScore', 'divisionScore'],
+                required: ['scoringMode'],
                 properties: [
-                    new OA\Property(property: 'scoringMode', type: 'string', example: 'total_score'),
+                    new OA\Property(property: 'scoringMode', type: 'string', enum: ['total_score', 'division_score'], example: 'total_score'),
                     new OA\Property(
                         property: 'totalScore',
+                        description: 'Required when scoringMode is total_score.',
                         required: ['classScorePercent', 'examScorePercent'],
                         properties: [
                             new OA\Property(property: 'classScorePercent', type: 'number', format: 'float', minimum: 0, maximum: 100, example: 50),
@@ -69,6 +70,7 @@ class MarkSettingController extends Controller
                     ),
                     new OA\Property(
                         property: 'divisionScore',
+                        description: 'Required when scoringMode is division_score.',
                         required: ['classScoreMax', 'homeAssignmentMax', 'projectMax', 'classTestMax', 'examAllocationPercent'],
                         properties: [
                             new OA\Property(property: 'classScoreMax', type: 'number', format: 'float', minimum: 0, example: 15),

@@ -29,16 +29,23 @@ class UpdateMarkSettingRequest extends FormRequest
      */
     public function rules(): array
     {
+        $isTotalScore = $this->input('scoringMode') === ScoringMode::TotalScore->value;
+        $isDivisionScore = $this->input('scoringMode') === ScoringMode::DivisionScore->value;
+
         return [
             'scoringMode' => ['required', Rule::enum(ScoringMode::class)],
-            'totalScore' => ['required', 'array'],
-            'totalScore.classScorePercent' => ['required', 'numeric', 'min:0', 'max:100'],
+            'totalScore' => [Rule::requiredIf($isTotalScore), 'array'],
+            'totalScore.classScorePercent' => [Rule::requiredIf($isTotalScore), 'numeric', 'min:0', 'max:100'],
             'totalScore.examScorePercent' => [
-                'required',
+                Rule::requiredIf($isTotalScore),
                 'numeric',
                 'min:0',
                 'max:100',
                 function (string $attribute, mixed $value, Closure $fail): void {
+                    if ($this->input('scoringMode') !== ScoringMode::TotalScore->value) {
+                        return;
+                    }
+
                     $classScorePercent = $this->input('totalScore.classScorePercent');
 
                     if (! is_numeric($classScorePercent) || round((float) $classScorePercent + (float) $value, 2) !== 100.0) {
@@ -46,12 +53,12 @@ class UpdateMarkSettingRequest extends FormRequest
                     }
                 },
             ],
-            'divisionScore' => ['required', 'array'],
-            'divisionScore.classScoreMax' => ['required', 'numeric', 'min:0'],
-            'divisionScore.homeAssignmentMax' => ['required', 'numeric', 'min:0'],
-            'divisionScore.projectMax' => ['required', 'numeric', 'min:0'],
-            'divisionScore.classTestMax' => ['required', 'numeric', 'min:0'],
-            'divisionScore.examAllocationPercent' => ['required', 'numeric', 'min:0', 'max:100'],
+            'divisionScore' => [Rule::requiredIf($isDivisionScore), 'array'],
+            'divisionScore.classScoreMax' => [Rule::requiredIf($isDivisionScore), 'numeric', 'min:0'],
+            'divisionScore.homeAssignmentMax' => [Rule::requiredIf($isDivisionScore), 'numeric', 'min:0'],
+            'divisionScore.projectMax' => [Rule::requiredIf($isDivisionScore), 'numeric', 'min:0'],
+            'divisionScore.classTestMax' => [Rule::requiredIf($isDivisionScore), 'numeric', 'min:0'],
+            'divisionScore.examAllocationPercent' => [Rule::requiredIf($isDivisionScore), 'numeric', 'min:0', 'max:100'],
         ];
     }
 }

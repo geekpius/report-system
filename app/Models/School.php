@@ -64,13 +64,13 @@ class School extends Model
     }
 
     /**
-     * @return Attribute<string, string>
+     * @return Attribute<string|null, string|null>
      */
     protected function motto(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value): string => Str::title($value),
-            set: fn (string $value): string => Str::lower($value),
+            get: fn (?string $value): ?string => $value === null ? null : Str::title($value),
+            set: fn (?string $value): ?string => $value === null ? null : Str::lower(Str::squish($value)),
         );
     }
 
