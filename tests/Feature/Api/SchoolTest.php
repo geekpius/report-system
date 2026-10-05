@@ -96,7 +96,6 @@ class SchoolTest extends TestCase
                 'type' => SchoolType::Public->value,
                 'phone' => '0241111111',
                 'motto' => 'Learn well',
-                'email' => 'office@ridge.edu.gh',
             ]))
             ->assertOk()
             ->assertJsonPath('success', true)
@@ -107,7 +106,6 @@ class SchoolTest extends TestCase
             ->assertJsonPath('data.type', SchoolType::Public->value)
             ->assertJsonPath('data.phone', '0241111111')
             ->assertJsonPath('data.motto', 'Learn well')
-            ->assertJsonPath('data.email', 'office@ridge.edu.gh')
             ->assertJsonPath('data.inSession', false)
             ->assertJsonPath('data.ownerId', $owner->id);
 

@@ -92,7 +92,7 @@ class SchoolController extends Controller
     #[OA\Put(
         path: '/schools/{school}',
         summary: 'Update a school',
-        description: 'Updates school profile fields for a school owned by the authenticated client. motto and email are optional. Use the in-session and status endpoints to change those values.',
+        description: 'Updates school profile fields for a school owned by the authenticated client. motto is optional. Use the in-session and status endpoints to change those values.',
         security: [['sanctum' => []]],
         tags: ['Schools'],
         parameters: [
@@ -109,7 +109,6 @@ class SchoolController extends Controller
                     new OA\Property(property: 'type', type: 'string', enum: ['private', 'public'], example: 'private'),
                     new OA\Property(property: 'phone', type: 'string', maxLength: 255, example: '0240000000'),
                     new OA\Property(property: 'motto', type: 'string', maxLength: 255, nullable: true, example: 'Excellence'),
-                    new OA\Property(property: 'email', type: 'string', format: 'email', maxLength: 255, nullable: true, example: 'office@ridge.edu.gh'),
                 ]
             )
         ),

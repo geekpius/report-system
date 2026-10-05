@@ -64,6 +64,17 @@ class School extends Model
     }
 
     /**
+     * @return Attribute<string, string>
+     */
+    protected function motto(): Attribute
+    {
+        return Attribute::make(
+            get: fn (string $value): string => Str::title($value),
+            set: fn (string $value): string => Str::lower($value),
+        );
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array

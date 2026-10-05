@@ -3432,7 +3432,7 @@
                     "Schools"
                 ],
                 "summary": "Update a school",
-                "description": "Updates school profile fields for a school owned by the authenticated client. motto and email are optional. Use the in-session and status endpoints to change those values.",
+                "description": "Updates school profile fields for a school owned by the authenticated client. motto is optional. Use the in-session and status endpoints to change those values.",
                 "operationId": "bb6ed13b5e6e99e9a42296293ed3f38d",
                 "parameters": [
                     {
@@ -3489,13 +3489,6 @@
                                     "motto": {
                                         "type": "string",
                                         "example": "Excellence",
-                                        "nullable": true,
-                                        "maxLength": 255
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "office@ridge.edu.gh",
                                         "nullable": true,
                                         "maxLength": 255
                                     }

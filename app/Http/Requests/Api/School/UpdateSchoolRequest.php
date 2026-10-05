@@ -35,7 +35,6 @@ class UpdateSchoolRequest extends FormRequest
             'type' => ['required', Rule::enum(SchoolType::class)],
             'phone' => ['required', 'string', 'max:255'],
             'motto' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'string', 'email', 'max:255'],
         ];
     }
 }
