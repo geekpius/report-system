@@ -36,7 +36,7 @@ class Subject extends Model
     {
         return Attribute::make(
             get: fn (string $value): string => Str::title($value),
-            set: fn (string $value): string => Str::squish($value),
+            set: fn (string $value): string => Str::lower(Str::squish($value)),
         );
     }
 
