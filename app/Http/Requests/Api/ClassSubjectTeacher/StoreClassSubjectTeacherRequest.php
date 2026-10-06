@@ -19,11 +19,14 @@ class StoreClassSubjectTeacherRequest extends FormRequest
     {
         $client = $this->user();
         $school = $this->route('school');
+        $schoolClass = $this->route('schoolClass');
 
         return $client instanceof Client
             && $client->role === Role::Owner
             && $school instanceof School
-            && $school->owner_id === $client->id;
+            && $school->owner_id === $client->id
+            && $schoolClass instanceof SchoolClass
+            && $schoolClass->school_id === $school->id;
     }
 
     /**
@@ -32,20 +35,16 @@ class StoreClassSubjectTeacherRequest extends FormRequest
     public function rules(): array
     {
         $school = $this->route('school');
+        $schoolClass = $this->route('schoolClass');
 
         return [
-            'schoolClassId' => [
-                'required',
-                'uuid',
-                Rule::exists(SchoolClass::class, 'id')->where('school_id', $school->id),
-            ],
             'subjectIds' => ['required', 'array', 'min:1'],
             'subjectIds.*' => [
                 'uuid',
                 'distinct',
                 Rule::exists(Subject::class, 'id')->where('school_id', $school->id),
                 Rule::unique(ClassSubjectTeacher::class, 'subject_id')
-                    ->where('school_class_id', $this->input('schoolClassId')),
+                    ->where('school_class_id', $schoolClass->id),
             ],
             'teacherId' => [
                 'required',

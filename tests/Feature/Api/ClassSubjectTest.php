@@ -81,17 +81,23 @@ class ClassSubjectTest extends TestCase
         $owner = Client::factory()->owner()->create();
         $school = School::factory()->for($owner, 'owner')->create();
         $class = SchoolClass::factory()->create(['school_id' => $school->id]);
+        $art = Subject::factory()->create(['school_id' => $school->id, 'name' => 'Art']);
         $english = Subject::factory()->create(['school_id' => $school->id, 'name' => 'English']);
         $math = Subject::factory()->create(['school_id' => $school->id, 'name' => 'Mathematics']);
         ClassSubject::factory()->create([
             'school_class_id' => $class->id,
-            'subject_id' => $english->id,
+            'subject_id' => $math->id,
             'is_mandatory' => true,
         ]);
         ClassSubject::factory()->create([
             'school_class_id' => $class->id,
-            'subject_id' => $math->id,
+            'subject_id' => $art->id,
             'is_mandatory' => false,
+        ]);
+        ClassSubject::factory()->create([
+            'school_class_id' => $class->id,
+            'subject_id' => $english->id,
+            'is_mandatory' => true,
         ]);
         ClassSubject::factory()->create();
         $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
@@ -100,11 +106,13 @@ class ClassSubjectTest extends TestCase
             ->getJson(route('api.schools.classes.subjects.index', [$school, $class]))
             ->assertOk()
             ->assertJsonPath('success', true)
-            ->assertJsonCount(2, 'data')
+            ->assertJsonCount(3, 'data')
             ->assertJsonPath('data.0.subject.name', 'English')
             ->assertJsonPath('data.0.isMandatory', true)
             ->assertJsonPath('data.1.subject.name', 'Mathematics')
-            ->assertJsonPath('data.1.isMandatory', false);
+            ->assertJsonPath('data.1.isMandatory', true)
+            ->assertJsonPath('data.2.subject.name', 'Art')
+            ->assertJsonPath('data.2.isMandatory', false);
     }
 
     public function test_owners_cannot_assign_subjects_from_another_school(): void

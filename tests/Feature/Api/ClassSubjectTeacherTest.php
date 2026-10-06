@@ -27,8 +27,7 @@ class ClassSubjectTeacherTest extends TestCase
         $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
 
         $this->withToken($token)
-            ->postJson(route('api.schools.class-subject-teachers.store', $school), [
-                'schoolClassId' => $class->id,
+            ->postJson(route('api.schools.class-subject-teachers.store', [$school, $class]), [
                 'subjectIds' => [$mathematics->id, $statistics->id, $physics->id],
                 'teacherId' => $teacher->id,
             ])
@@ -41,21 +40,13 @@ class ClassSubjectTeacherTest extends TestCase
             ->assertJsonPath('data.1.subject.name', 'Statistics')
             ->assertJsonPath('data.2.subject.name', 'Physics');
 
-        $this->assertDatabaseHas('class_subject_teachers', [
-            'school_class_id' => $class->id,
-            'subject_id' => $mathematics->id,
-            'teacher_id' => $teacher->id,
-        ]);
-        $this->assertDatabaseHas('class_subject_teachers', [
-            'school_class_id' => $class->id,
-            'subject_id' => $statistics->id,
-            'teacher_id' => $teacher->id,
-        ]);
-        $this->assertDatabaseHas('class_subject_teachers', [
-            'school_class_id' => $class->id,
-            'subject_id' => $physics->id,
-            'teacher_id' => $teacher->id,
-        ]);
+        foreach ([$mathematics, $statistics, $physics] as $subject) {
+            $this->assertDatabaseHas('class_subject_teachers', [
+                'school_class_id' => $class->id,
+                'subject_id' => $subject->id,
+                'teacher_id' => $teacher->id,
+            ]);
+        }
     }
 
     public function test_owners_cannot_assign_entities_from_another_school(): void
@@ -68,8 +59,7 @@ class ClassSubjectTeacherTest extends TestCase
         $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
 
         $this->withToken($token)
-            ->postJson(route('api.schools.class-subject-teachers.store', $school), [
-                'schoolClassId' => $class->id,
+            ->postJson(route('api.schools.class-subject-teachers.store', [$school, $class]), [
                 'subjectIds' => [$otherSubject->id],
                 'teacherId' => $otherTeacher->id,
             ])
@@ -93,8 +83,7 @@ class ClassSubjectTeacherTest extends TestCase
         $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
 
         $this->withToken($token)
-            ->postJson(route('api.schools.class-subject-teachers.store', $school), [
-                'schoolClassId' => $class->id,
+            ->postJson(route('api.schools.class-subject-teachers.store', [$school, $class]), [
                 'subjectIds' => [$subject->id],
                 'teacherId' => $secondTeacher->id,
             ])
@@ -112,8 +101,7 @@ class ClassSubjectTeacherTest extends TestCase
         $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
 
         $this->withToken($token)
-            ->postJson(route('api.schools.class-subject-teachers.store', $school), [
-                'schoolClassId' => $class->id,
+            ->postJson(route('api.schools.class-subject-teachers.store', [$school, $class]), [
                 'subjectIds' => [$subject->id, $subject->id],
                 'teacherId' => $teacher->id,
             ])
@@ -121,51 +109,78 @@ class ClassSubjectTeacherTest extends TestCase
             ->assertJsonValidationErrors(['subjectIds.1']);
     }
 
-    public function test_owners_can_list_assignments_for_their_school(): void
+    public function test_owners_can_list_subject_teachers_for_a_class(): void
     {
         $owner = Client::factory()->owner()->create();
         $school = School::factory()->for($owner, 'owner')->create();
-        $class = SchoolClass::factory()->create(['school_id' => $school->id, 'name' => 'JHS 1A']);
+        $class = SchoolClass::factory()->create(['school_id' => $school->id]);
+        $otherClass = SchoolClass::factory()->create(['school_id' => $school->id]);
         $english = Subject::factory()->create(['school_id' => $school->id, 'name' => 'English']);
         $math = Subject::factory()->create(['school_id' => $school->id, 'name' => 'Mathematics']);
-        $teacher = Teacher::factory()->create(['school_id' => $school->id]);
-        ClassSubjectTeacher::factory()->create([
-            'school_class_id' => $class->id,
-            'subject_id' => $english->id,
-            'teacher_id' => $teacher->id,
-        ]);
+        $mathTeacher = Teacher::factory()->create(['school_id' => $school->id]);
+        $englishTeacher = Teacher::factory()->create(['school_id' => $school->id]);
         ClassSubjectTeacher::factory()->create([
             'school_class_id' => $class->id,
             'subject_id' => $math->id,
-            'teacher_id' => $teacher->id,
+            'teacher_id' => $mathTeacher->id,
         ]);
-        ClassSubjectTeacher::factory()->create();
+        ClassSubjectTeacher::factory()->create([
+            'school_class_id' => $class->id,
+            'subject_id' => $english->id,
+            'teacher_id' => $englishTeacher->id,
+        ]);
+        ClassSubjectTeacher::factory()->create([
+            'school_class_id' => $otherClass->id,
+            'subject_id' => $math->id,
+            'teacher_id' => $englishTeacher->id,
+        ]);
         $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
 
         $this->withToken($token)
-            ->getJson(route('api.schools.class-subject-teachers.index', $school))
+            ->getJson(route('api.schools.class-subject-teachers.index', [$school, $class]))
             ->assertOk()
             ->assertJsonPath('success', true)
             ->assertJsonCount(2, 'data')
             ->assertJsonPath('data.0.subject.name', 'English')
-            ->assertJsonPath('data.1.subject.name', 'Mathematics');
+            ->assertJsonPath('data.0.teacher.id', $englishTeacher->id)
+            ->assertJsonPath('data.1.subject.name', 'Mathematics')
+            ->assertJsonPath('data.1.teacher.id', $mathTeacher->id);
+    }
+
+    public function test_owners_cannot_manage_assignments_for_a_class_in_another_school(): void
+    {
+        $owner = Client::factory()->owner()->create();
+        $school = School::factory()->for($owner, 'owner')->create();
+        $otherClass = SchoolClass::factory()->create();
+        $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
+
+        $this->withToken($token)
+            ->getJson(route('api.schools.class-subject-teachers.index', [$school, $otherClass]))
+            ->assertForbidden();
+
+        $this->withToken($token)
+            ->postJson(route('api.schools.class-subject-teachers.store', [$school, $otherClass]), [
+                'subjectIds' => [Subject::factory()->create(['school_id' => $school->id])->id],
+                'teacherId' => Teacher::factory()->create(['school_id' => $school->id])->id,
+            ])
+            ->assertForbidden();
     }
 
     public function test_owners_cannot_manage_assignments_for_another_school(): void
     {
         $owner = Client::factory()->owner()->create();
         $otherSchool = School::factory()->create();
+        $otherClass = SchoolClass::factory()->create(['school_id' => $otherSchool->id]);
         $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
 
         $this->withToken($token)
-            ->getJson(route('api.schools.class-subject-teachers.index', $otherSchool))
+            ->getJson(route('api.schools.class-subject-teachers.index', [$otherSchool, $otherClass]))
             ->assertForbidden();
 
         $this->withToken($token)
-            ->postJson(route('api.schools.class-subject-teachers.store', $otherSchool), [
-                'schoolClassId' => SchoolClass::factory()->create()->id,
-                'subjectIds' => [Subject::factory()->create()->id],
-                'teacherId' => Teacher::factory()->create()->id,
+            ->postJson(route('api.schools.class-subject-teachers.store', [$otherSchool, $otherClass]), [
+                'subjectIds' => [Subject::factory()->create(['school_id' => $otherSchool->id])->id],
+                'teacherId' => Teacher::factory()->create(['school_id' => $otherSchool->id])->id,
             ])
             ->assertForbidden();
     }
@@ -174,15 +189,15 @@ class ClassSubjectTeacherTest extends TestCase
     {
         $teacherClient = Client::factory()->teacher()->create();
         $school = School::factory()->create();
+        $class = SchoolClass::factory()->create(['school_id' => $school->id]);
         $token = $teacherClient->createToken('api-teacher', ['permit:teacher'])->plainTextToken;
 
         $this->withToken($token)
-            ->getJson(route('api.schools.class-subject-teachers.index', $school))
+            ->getJson(route('api.schools.class-subject-teachers.index', [$school, $class]))
             ->assertForbidden();
 
         $this->withToken($token)
-            ->postJson(route('api.schools.class-subject-teachers.store', $school), [
-                'schoolClassId' => SchoolClass::factory()->create(['school_id' => $school->id])->id,
+            ->postJson(route('api.schools.class-subject-teachers.store', [$school, $class]), [
                 'subjectIds' => [Subject::factory()->create(['school_id' => $school->id])->id],
                 'teacherId' => Teacher::factory()->create(['school_id' => $school->id])->id,
             ])
@@ -192,12 +207,12 @@ class ClassSubjectTeacherTest extends TestCase
     public function test_guests_cannot_manage_class_subject_teacher_assignments(): void
     {
         $school = School::factory()->create();
+        $class = SchoolClass::factory()->create(['school_id' => $school->id]);
 
-        $this->getJson(route('api.schools.class-subject-teachers.index', $school))
+        $this->getJson(route('api.schools.class-subject-teachers.index', [$school, $class]))
             ->assertUnauthorized();
 
-        $this->postJson(route('api.schools.class-subject-teachers.store', $school), [
-            'schoolClassId' => SchoolClass::factory()->create(['school_id' => $school->id])->id,
+        $this->postJson(route('api.schools.class-subject-teachers.store', [$school, $class]), [
             'subjectIds' => [Subject::factory()->create(['school_id' => $school->id])->id],
             'teacherId' => Teacher::factory()->create(['school_id' => $school->id])->id,
         ])->assertUnauthorized();
@@ -207,11 +222,12 @@ class ClassSubjectTeacherTest extends TestCase
     {
         $owner = Client::factory()->owner()->create();
         $school = School::factory()->for($owner, 'owner')->create();
+        $class = SchoolClass::factory()->create(['school_id' => $school->id]);
         $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
 
         $this->withToken($token)
-            ->postJson(route('api.schools.class-subject-teachers.store', $school), [])
+            ->postJson(route('api.schools.class-subject-teachers.store', [$school, $class]), [])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['schoolClassId', 'subjectIds', 'teacherId']);
+            ->assertJsonValidationErrors(['subjectIds', 'teacherId']);
     }
 }

@@ -1488,16 +1488,26 @@
                 ]
             }
         },
-        "/schools/{school}/class-subject-teachers": {
+        "/schools/{school}/classes/{schoolClass}/subject-teachers": {
             "get": {
                 "tags": [
                     "Class Subject Teachers"
                 ],
-                "summary": "List class-subject teacher assignments",
-                "operationId": "b4ed8fa71f0e9b6fd4a0053ac296b3e8",
+                "summary": "List a class's subject teachers",
+                "description": "Returns every subject-teacher assignment for the class, sorted by subject name.",
+                "operationId": "0ee0e45e5f798a97425095749e87480c",
                 "parameters": [
                     {
                         "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "schoolClass",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1508,7 +1518,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Assignments retrieved successfully",
+                        "description": "Class subject teachers retrieved successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1565,10 +1575,19 @@
                     "Class Subject Teachers"
                 ],
                 "summary": "Assign a teacher to subjects in a class",
-                "operationId": "42038335be698acb6347444c9669b66e",
+                "operationId": "1f2a3619f5a12c91e61a3fe11219e804",
                 "parameters": [
                     {
                         "name": "school",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "schoolClass",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -1583,15 +1602,10 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "schoolClassId",
                                     "subjectIds",
                                     "teacherId"
                                 ],
                                 "properties": {
-                                    "schoolClassId": {
-                                        "type": "string",
-                                        "format": "uuid"
-                                    },
                                     "subjectIds": {
                                         "type": "array",
                                         "items": {
@@ -1623,7 +1637,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Class subject teachers created successfully."
+                                            "example": "Teacher assigned to subjects successfully."
                                         },
                                         "data": {
                                             "type": "array",

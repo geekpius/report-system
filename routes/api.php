@@ -137,7 +137,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // class subject teacher routes
-    Route::prefix('schools/{school}/class-subject-teachers')->middleware('abilities:permit:owner')->group(function () {
+    Route::prefix('schools/{school}/classes/{schoolClass}/subject-teachers')->middleware('abilities:permit:owner')->group(function () {
         Route::get('/', [ClassSubjectTeacherController::class, 'index'])
             ->name('api.schools.class-subject-teachers.index');
 

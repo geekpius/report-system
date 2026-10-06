@@ -16,7 +16,10 @@ class ListClassSubjectAction
         $classSubjects = $schoolClass->classSubjects()
             ->with('subject')
             ->get()
-            ->sortBy('subject.name')
+            ->sortBy([
+                ['is_mandatory', 'desc'],
+                ['subject.name', 'asc'],
+            ])
             ->values();
 
         return $this->success(
