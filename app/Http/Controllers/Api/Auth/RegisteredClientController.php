@@ -79,7 +79,7 @@ class RegisteredClientController extends Controller
                 'type' => $request->enum('type', SchoolType::class),
                 'phone' => $request->string('phone'),
                 'status' => SchoolStatus::Active,
-                'in_session' => false,
+                'in_session' => true,
                 'owner_id' => $client->id,
             ]);
 
