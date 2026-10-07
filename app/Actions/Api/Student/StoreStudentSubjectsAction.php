@@ -1,32 +1,36 @@
 <?php
 
-namespace App\Actions\Api\StudentSubject;
+namespace App\Actions\Api\Student;
 
 use App\Concerns\ApiResponse;
 use App\Enums\StudentSubjectStatus;
-use App\Http\Requests\Api\StudentSubject\StoreStudentSubjectRequest;
+use App\Http\Requests\Api\Student\StoreStudentSubjectsRequest;
 use App\Http\Resources\StudentSubjectResource;
-use App\Models\StudentClassEnrollment;
+use App\Models\Student;
 use App\Models\StudentSubject;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
-class StoreStudentSubjectAction
+class StoreStudentSubjectsAction
 {
     use ApiResponse;
 
-    public function handle(
-        StoreStudentSubjectRequest $request,
-        StudentClassEnrollment $enrollment,
-    ): JsonResponse {
+    public function handle(StoreStudentSubjectsRequest $request, Student $student): JsonResponse
+    {
+        $enrollment = $student->activeClassEnrollment;
+
+        if ($enrollment === null) {
+            return $this->error('The student does not have an active class enrollment.', 422);
+        }
+
         try {
-            $studentSubjects = DB::transaction(function () use ($request, $enrollment) {
-                return collect($request->validated('subjects'))
-                    ->map(function (array $subject) use ($enrollment): StudentSubject {
+            $studentSubjects = DB::transaction(function () use ($request, $student, $enrollment) {
+                return collect($request->validated('subjectIds'))
+                    ->map(function (string $subjectId) use ($student, $enrollment): StudentSubject {
                         $existing = StudentSubject::query()
                             ->where('student_class_enrollment_id', $enrollment->id)
-                            ->where('subject_id', $subject['subjectId'])
+                            ->where('subject_id', $subjectId)
                             ->first();
 
                         if ($existing !== null) {
@@ -34,16 +38,16 @@ class StoreStudentSubjectAction
                                 'status' => StudentSubjectStatus::Active,
                             ]);
 
-                            return $existing->refresh()->load(['subject', 'schoolClass', 'classEnrollment']);
+                            return $existing->refresh();
                         }
 
                         return StudentSubject::query()->create([
-                            'student_id' => $enrollment->student_id,
-                            'subject_id' => $subject['subjectId'],
+                            'student_id' => $student->id,
+                            'subject_id' => $subjectId,
                             'school_class_id' => $enrollment->school_class_id,
                             'student_class_enrollment_id' => $enrollment->id,
                             'status' => StudentSubjectStatus::Active,
-                        ])->load(['subject', 'schoolClass', 'classEnrollment']);
+                        ]);
                     })
                     ->values();
             });
@@ -55,7 +59,7 @@ class StoreStudentSubjectAction
 
         return $this->success(
             StudentSubjectResource::collection($studentSubjects),
-            'Elective subjects assigned to student successfully.',
+            'Subjects assigned to student successfully.',
             201,
         );
     }

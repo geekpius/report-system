@@ -6,15 +6,20 @@ use App\Actions\Api\Student\ListStudentAction;
 use App\Actions\Api\Student\ListStudentSubjectsAction;
 use App\Actions\Api\Student\ShowStudentAction;
 use App\Actions\Api\Student\StoreStudentAction;
+use App\Actions\Api\Student\StoreStudentSubjectsAction;
+use App\Actions\Api\Student\UnassignStudentSubjectAction;
 use App\Actions\Api\Student\UpdateStudentAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Student\ListStudentRequest;
 use App\Http\Requests\Api\Student\ListStudentSubjectsRequest;
 use App\Http\Requests\Api\Student\ShowStudentRequest;
 use App\Http\Requests\Api\Student\StoreStudentRequest;
+use App\Http\Requests\Api\Student\StoreStudentSubjectsRequest;
+use App\Http\Requests\Api\Student\UnassignStudentSubjectRequest;
 use App\Http\Requests\Api\Student\UpdateStudentRequest;
 use App\Models\School;
 use App\Models\Student;
+use App\Models\StudentSubject;
 use Illuminate\Http\JsonResponse;
 use OpenApi\Attributes as OA;
 
@@ -224,5 +229,92 @@ class StudentController extends Controller
         ListStudentSubjectsAction $action,
     ): JsonResponse {
         return $action->handle($student);
+    }
+
+    #[OA\Post(
+        path: '/schools/{school}/students/{student}/subjects',
+        summary: 'Assign subjects to a student',
+        description: 'Adds elective subjects to the student\'s active class enrollment. Subjects must be offered as electives on the class menu and not already assigned.',
+        security: [['sanctum' => []]],
+        tags: ['Students'],
+        parameters: [
+            new OA\Parameter(name: 'school', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
+            new OA\Parameter(name: 'student', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['subjectIds'],
+                properties: [
+                    new OA\Property(
+                        property: 'subjectIds',
+                        type: 'array',
+                        minItems: 1,
+                        items: new OA\Items(type: 'string', format: 'uuid'),
+                    ),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Subjects assigned to student successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Subjects assigned to student successfully.'),
+                        new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/StudentSubject')),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
+            new OA\Response(response: 403, description: 'Forbidden', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
+            new OA\Response(response: 422, description: 'Validation error', content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')),
+        ]
+    )]
+    public function storeSubjects(
+        StoreStudentSubjectsRequest $request,
+        School $school,
+        Student $student,
+        StoreStudentSubjectsAction $action,
+    ): JsonResponse {
+        return $action->handle($request, $student);
+    }
+
+    #[OA\Put(
+        path: '/schools/{school}/students/{student}/subjects/{studentSubject}/unassign',
+        summary: 'Unassign a subject from a student',
+        description: 'Marks an active student subject enrollment as dropped. Dropped subjects no longer appear in the student\'s active subject list.',
+        security: [['sanctum' => []]],
+        tags: ['Students'],
+        parameters: [
+            new OA\Parameter(name: 'school', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
+            new OA\Parameter(name: 'student', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
+            new OA\Parameter(name: 'studentSubject', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Subject unassigned from student successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
+                        new OA\Property(property: 'message', type: 'string', example: 'Subject unassigned from student successfully.'),
+                        new OA\Property(property: 'data', ref: '#/components/schemas/StudentSubject'),
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Unauthenticated', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
+            new OA\Response(response: 403, description: 'Forbidden', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
+        ]
+    )]
+    public function unassignSubject(
+        UnassignStudentSubjectRequest $request,
+        School $school,
+        Student $student,
+        StudentSubject $studentSubject,
+        UnassignStudentSubjectAction $action,
+    ): JsonResponse {
+        return $action->handle($studentSubject);
     }
 }

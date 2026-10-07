@@ -25,11 +25,24 @@ class ListClassSubjectRequest extends FormRequest
             && $schoolClass->school_id === $school->id;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if (! $this->has('isMandatory')) {
+            return;
+        }
+
+        $this->merge([
+            'isMandatory' => filter_var($this->input('isMandatory'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
+        ]);
+    }
+
     /**
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
-        return [];
+        return [
+            'isMandatory' => ['sometimes', 'boolean'],
+        ];
     }
 }

@@ -115,6 +115,56 @@ class ClassSubjectTest extends TestCase
             ->assertJsonPath('data.2.isMandatory', false);
     }
 
+    public function test_owners_can_filter_class_subjects_by_is_mandatory(): void
+    {
+        $owner = Client::factory()->owner()->create();
+        $school = School::factory()->for($owner, 'owner')->create();
+        $class = SchoolClass::factory()->create(['school_id' => $school->id]);
+        $art = Subject::factory()->create(['school_id' => $school->id, 'name' => 'Art']);
+        $english = Subject::factory()->create(['school_id' => $school->id, 'name' => 'English']);
+        $math = Subject::factory()->create(['school_id' => $school->id, 'name' => 'Mathematics']);
+        ClassSubject::factory()->create([
+            'school_class_id' => $class->id,
+            'subject_id' => $math->id,
+            'is_mandatory' => true,
+        ]);
+        ClassSubject::factory()->create([
+            'school_class_id' => $class->id,
+            'subject_id' => $art->id,
+            'is_mandatory' => false,
+        ]);
+        ClassSubject::factory()->create([
+            'school_class_id' => $class->id,
+            'subject_id' => $english->id,
+            'is_mandatory' => true,
+        ]);
+        $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
+
+        $this->withToken($token)
+            ->getJson(route('api.schools.classes.subjects.index', [
+                'school' => $school,
+                'schoolClass' => $class,
+                'isMandatory' => 'true',
+            ]))
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.subject.name', 'English')
+            ->assertJsonPath('data.0.isMandatory', true)
+            ->assertJsonPath('data.1.subject.name', 'Mathematics')
+            ->assertJsonPath('data.1.isMandatory', true);
+
+        $this->withToken($token)
+            ->getJson(route('api.schools.classes.subjects.index', [
+                'school' => $school,
+                'schoolClass' => $class,
+                'isMandatory' => 'false',
+            ]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.subject.name', 'Art')
+            ->assertJsonPath('data.0.isMandatory', false);
+    }
+
     public function test_owners_cannot_assign_subjects_from_another_school(): void
     {
         $owner = Client::factory()->owner()->create();

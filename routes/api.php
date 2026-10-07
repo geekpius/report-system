@@ -239,6 +239,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/{student}/subjects', [StudentController::class, 'subjects'])
             ->name('api.schools.students.subjects.index');
+
+        Route::post('/{student}/subjects', [StudentController::class, 'storeSubjects'])
+            ->name('api.schools.students.subjects.store');
+
+        Route::put('/{student}/subjects/{studentSubject}/unassign', [StudentController::class, 'unassignSubject'])
+            ->name('api.schools.students.subjects.unassign');
     });
 
     // student term result routes

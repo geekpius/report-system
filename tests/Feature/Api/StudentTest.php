@@ -386,6 +386,226 @@ class StudentTest extends TestCase
             ->assertJsonPath('data.1.subject.name', 'French');
     }
 
+    public function test_owners_can_assign_subjects_to_a_student(): void
+    {
+        ['school' => $school, 'token' => $token] = $this->ownerContext();
+        $schoolClass = SchoolClass::factory()->create(['school_id' => $school->id]);
+        $student = Student::factory()->create([
+            'school_id' => $school->id,
+            'school_class_id' => $schoolClass->id,
+        ]);
+        $enrollment = StudentClassEnrollment::factory()->create([
+            'student_id' => $student->id,
+            'school_class_id' => $schoolClass->id,
+            'status' => EnrollmentStatus::Active,
+        ]);
+        $french = Subject::factory()->create(['school_id' => $school->id, 'name' => 'French']);
+        $music = Subject::factory()->create(['school_id' => $school->id, 'name' => 'Music']);
+        ClassSubject::factory()->create([
+            'school_class_id' => $schoolClass->id,
+            'subject_id' => $french->id,
+            'is_mandatory' => false,
+        ]);
+        ClassSubject::factory()->create([
+            'school_class_id' => $schoolClass->id,
+            'subject_id' => $music->id,
+            'is_mandatory' => false,
+        ]);
+
+        $this->withToken($token)
+            ->postJson(route('api.schools.students.subjects.store', [$school, $student]), [
+                'subjectIds' => [$french->id, $music->id],
+            ])
+            ->assertCreated()
+            ->assertJsonPath('success', true)
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.subjectId', $french->id)
+            ->assertJsonPath('data.1.subjectId', $music->id)
+            ->assertJsonPath('data.0.studentClassEnrollmentId', $enrollment->id);
+
+        $this->assertDatabaseHas('student_subjects', [
+            'student_id' => $student->id,
+            'subject_id' => $french->id,
+            'student_class_enrollment_id' => $enrollment->id,
+        ]);
+        $this->assertDatabaseHas('student_subjects', [
+            'student_id' => $student->id,
+            'subject_id' => $music->id,
+            'student_class_enrollment_id' => $enrollment->id,
+        ]);
+    }
+
+    public function test_owners_cannot_assign_mandatory_subjects_via_student_subjects_endpoint(): void
+    {
+        ['school' => $school, 'token' => $token] = $this->ownerContext();
+        $schoolClass = SchoolClass::factory()->create(['school_id' => $school->id]);
+        $student = Student::factory()->create([
+            'school_id' => $school->id,
+            'school_class_id' => $schoolClass->id,
+        ]);
+        StudentClassEnrollment::factory()->create([
+            'student_id' => $student->id,
+            'school_class_id' => $schoolClass->id,
+            'status' => EnrollmentStatus::Active,
+        ]);
+        $mathematics = Subject::factory()->create(['school_id' => $school->id]);
+        ClassSubject::factory()->create([
+            'school_class_id' => $schoolClass->id,
+            'subject_id' => $mathematics->id,
+            'is_mandatory' => true,
+        ]);
+
+        $this->withToken($token)
+            ->postJson(route('api.schools.students.subjects.store', [$school, $student]), [
+                'subjectIds' => [$mathematics->id],
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['subjectIds.0']);
+    }
+
+    public function test_owners_cannot_assign_subjects_without_an_active_enrollment(): void
+    {
+        ['school' => $school, 'token' => $token] = $this->ownerContext();
+        $schoolClass = SchoolClass::factory()->create(['school_id' => $school->id]);
+        $student = Student::factory()->create([
+            'school_id' => $school->id,
+            'school_class_id' => $schoolClass->id,
+        ]);
+        $french = Subject::factory()->create(['school_id' => $school->id]);
+        ClassSubject::factory()->create([
+            'school_class_id' => $schoolClass->id,
+            'subject_id' => $french->id,
+            'is_mandatory' => false,
+        ]);
+
+        $this->withToken($token)
+            ->postJson(route('api.schools.students.subjects.store', [$school, $student]), [
+                'subjectIds' => [$french->id],
+            ])
+            ->assertUnprocessable();
+    }
+
+    public function test_owners_can_unassign_a_subject_from_a_student(): void
+    {
+        ['school' => $school, 'token' => $token] = $this->ownerContext();
+        $schoolClass = SchoolClass::factory()->create(['school_id' => $school->id]);
+        $student = Student::factory()->create([
+            'school_id' => $school->id,
+            'school_class_id' => $schoolClass->id,
+        ]);
+        $enrollment = StudentClassEnrollment::factory()->create([
+            'student_id' => $student->id,
+            'school_class_id' => $schoolClass->id,
+        ]);
+        $french = Subject::factory()->create(['school_id' => $school->id, 'name' => 'French']);
+        $studentSubject = StudentSubject::factory()->create([
+            'student_id' => $student->id,
+            'subject_id' => $french->id,
+            'school_class_id' => $schoolClass->id,
+            'student_class_enrollment_id' => $enrollment->id,
+            'status' => StudentSubjectStatus::Active,
+        ]);
+
+        $this->withToken($token)
+            ->putJson(route('api.schools.students.subjects.unassign', [$school, $student, $studentSubject]))
+            ->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.id', $studentSubject->id)
+            ->assertJsonPath('data.status', StudentSubjectStatus::Dropped->value);
+
+        $this->assertDatabaseHas('student_subjects', [
+            'id' => $studentSubject->id,
+            'status' => StudentSubjectStatus::Dropped->value,
+        ]);
+
+        $this->withToken($token)
+            ->getJson(route('api.schools.students.subjects.index', [$school, $student]))
+            ->assertOk()
+            ->assertJsonCount(0, 'data');
+    }
+
+    public function test_owners_can_reassign_a_dropped_subject_to_a_student(): void
+    {
+        ['school' => $school, 'token' => $token] = $this->ownerContext();
+        $schoolClass = SchoolClass::factory()->create(['school_id' => $school->id]);
+        $student = Student::factory()->create([
+            'school_id' => $school->id,
+            'school_class_id' => $schoolClass->id,
+        ]);
+        $enrollment = StudentClassEnrollment::factory()->create([
+            'student_id' => $student->id,
+            'school_class_id' => $schoolClass->id,
+            'status' => EnrollmentStatus::Active,
+        ]);
+        $french = Subject::factory()->create(['school_id' => $school->id, 'name' => 'French']);
+        ClassSubject::factory()->create([
+            'school_class_id' => $schoolClass->id,
+            'subject_id' => $french->id,
+            'is_mandatory' => false,
+        ]);
+        $studentSubject = StudentSubject::factory()->create([
+            'student_id' => $student->id,
+            'subject_id' => $french->id,
+            'school_class_id' => $schoolClass->id,
+            'student_class_enrollment_id' => $enrollment->id,
+            'status' => StudentSubjectStatus::Dropped,
+        ]);
+
+        $this->withToken($token)
+            ->postJson(route('api.schools.students.subjects.store', [$school, $student]), [
+                'subjectIds' => [$french->id],
+            ])
+            ->assertCreated()
+            ->assertJsonPath('success', true)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $studentSubject->id)
+            ->assertJsonPath('data.0.status', StudentSubjectStatus::Active->value);
+
+        $this->assertDatabaseHas('student_subjects', [
+            'id' => $studentSubject->id,
+            'subject_id' => $french->id,
+            'status' => StudentSubjectStatus::Active->value,
+        ]);
+        $this->assertDatabaseCount('student_subjects', 1);
+    }
+
+    public function test_owners_cannot_unassign_a_subject_that_belongs_to_another_student(): void
+    {
+        ['school' => $school, 'token' => $token] = $this->ownerContext();
+        $student = Student::factory()->create(['school_id' => $school->id]);
+        $otherStudentSubject = StudentSubject::factory()->create([
+            'status' => StudentSubjectStatus::Active,
+        ]);
+
+        $this->withToken($token)
+            ->putJson(route('api.schools.students.subjects.unassign', [$school, $student, $otherStudentSubject]))
+            ->assertForbidden();
+    }
+
+    public function test_owners_cannot_unassign_a_subject_that_is_not_active(): void
+    {
+        ['school' => $school, 'token' => $token] = $this->ownerContext();
+        $schoolClass = SchoolClass::factory()->create(['school_id' => $school->id]);
+        $student = Student::factory()->create([
+            'school_id' => $school->id,
+            'school_class_id' => $schoolClass->id,
+        ]);
+        $enrollment = StudentClassEnrollment::factory()->create([
+            'student_id' => $student->id,
+            'school_class_id' => $schoolClass->id,
+        ]);
+        $studentSubject = StudentSubject::factory()->create([
+            'student_id' => $student->id,
+            'school_class_id' => $schoolClass->id,
+            'student_class_enrollment_id' => $enrollment->id,
+            'status' => StudentSubjectStatus::Dropped,
+        ]);
+
+        $this->withToken($token)
+            ->putJson(route('api.schools.students.subjects.unassign', [$school, $student, $studentSubject]))
+            ->assertForbidden();
+    }
+
     public function test_owners_cannot_list_subjects_for_students_from_another_school(): void
     {
         ['school' => $school, 'token' => $token] = $this->ownerContext();

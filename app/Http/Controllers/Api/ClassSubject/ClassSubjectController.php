@@ -22,6 +22,7 @@ class ClassSubjectController extends Controller
         parameters: [
             new OA\Parameter(name: 'school', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'schoolClass', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
+            new OA\Parameter(name: 'isMandatory', in: 'query', required: false, description: 'Filter by whether the subject is mandatory.', schema: new OA\Schema(type: 'boolean', example: true)),
         ],
         responses: [
             new OA\Response(
@@ -37,6 +38,7 @@ class ClassSubjectController extends Controller
             ),
             new OA\Response(response: 401, description: 'Unauthenticated', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
             new OA\Response(response: 403, description: 'Forbidden', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
+            new OA\Response(response: 422, description: 'Validation error', content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')),
         ]
     )]
     public function index(
@@ -45,7 +47,7 @@ class ClassSubjectController extends Controller
         SchoolClass $schoolClass,
         ListClassSubjectAction $action,
     ): JsonResponse {
-        return $action->handle($schoolClass);
+        return $action->handle($request, $schoolClass);
     }
 
     #[OA\Post(
