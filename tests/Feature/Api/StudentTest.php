@@ -177,6 +177,68 @@ class StudentTest extends TestCase
             ->assertJsonPath('meta.total', 3);
     }
 
+    public function test_owners_can_search_students_by_name_or_admission_number(): void
+    {
+        ['school' => $school, 'token' => $token] = $this->ownerContext();
+
+        $byFirstName = Student::factory()->create([
+            'school_id' => $school->id,
+            'admission_number' => 'ADM-1001',
+            'first_name' => 'Akosua',
+            'middle_name' => null,
+            'last_name' => 'Mensah',
+        ]);
+        $byMiddleName = Student::factory()->create([
+            'school_id' => $school->id,
+            'admission_number' => 'ADM-1002',
+            'first_name' => 'John',
+            'middle_name' => 'Kwame',
+            'last_name' => 'Boateng',
+        ]);
+        $byAdmissionNumber = Student::factory()->create([
+            'school_id' => $school->id,
+            'admission_number' => 'ADM-SEARCH-9',
+            'first_name' => 'Yaw',
+            'middle_name' => null,
+            'last_name' => 'Asante',
+        ]);
+        Student::factory()->create([
+            'school_id' => $school->id,
+            'admission_number' => 'ADM-9999',
+            'first_name' => 'Other',
+            'middle_name' => null,
+            'last_name' => 'Student',
+        ]);
+
+        $this->withToken($token)
+            ->getJson(route('api.schools.students.index', [
+                'school' => $school,
+                'searchTerm' => 'akosua',
+            ]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $byFirstName->id)
+            ->assertJsonPath('meta.total', 1);
+
+        $this->withToken($token)
+            ->getJson(route('api.schools.students.index', [
+                'school' => $school,
+                'searchTerm' => 'kwame',
+            ]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $byMiddleName->id);
+
+        $this->withToken($token)
+            ->getJson(route('api.schools.students.index', [
+                'school' => $school,
+                'searchTerm' => 'SEARCH-9',
+            ]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $byAdmissionNumber->id);
+    }
+
     public function test_owners_can_show_a_student(): void
     {
         ['school' => $school, 'token' => $token] = $this->ownerContext();

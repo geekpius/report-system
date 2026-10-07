@@ -36,9 +36,9 @@ class ClassSubjectTeacherTest extends TestCase
             ->assertJsonCount(3, 'data')
             ->assertJsonPath('data.0.schoolClassId', $class->id)
             ->assertJsonPath('data.0.teacherId', $teacher->id)
-            ->assertJsonPath('data.0.subject.name', 'Mathematics')
-            ->assertJsonPath('data.1.subject.name', 'Statistics')
-            ->assertJsonPath('data.2.subject.name', 'Physics');
+            ->assertJsonPath('data.0.subjectId', $mathematics->id)
+            ->assertJsonPath('data.1.subjectId', $statistics->id)
+            ->assertJsonPath('data.2.subjectId', $physics->id);
 
         foreach ([$mathematics, $statistics, $physics] as $subject) {
             $this->assertDatabaseHas('class_subject_teachers', [

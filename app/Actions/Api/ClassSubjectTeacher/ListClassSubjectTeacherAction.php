@@ -14,7 +14,7 @@ class ListClassSubjectTeacherAction
     public function handle(SchoolClass $schoolClass): JsonResponse
     {
         $assignments = $schoolClass->teacherAssignments()
-            ->with(['subject', 'teacher'])
+            ->with(['subject', 'teacher.client'])
             ->get()
             ->sortBy('subject.name')
             ->values();

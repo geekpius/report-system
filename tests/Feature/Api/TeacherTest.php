@@ -146,6 +146,72 @@ class TeacherTest extends TestCase
             ->assertJsonPath('meta.total', 3);
     }
 
+    public function test_owners_can_search_teachers_by_name_email_or_staff_number(): void
+    {
+        ['school' => $school, 'token' => $token] = $this->ownerContext();
+
+        $byName = Teacher::factory()->create([
+            'school_id' => $school->id,
+            'staff_number' => 'STF-1001',
+            'client_id' => Client::factory()->teacher()->create([
+                'name' => 'Kwame Mensah',
+                'email' => 'kwame@example.com',
+            ])->id,
+        ]);
+        $byEmail = Teacher::factory()->create([
+            'school_id' => $school->id,
+            'staff_number' => 'STF-1002',
+            'client_id' => Client::factory()->teacher()->create([
+                'name' => 'Ama Boateng',
+                'email' => 'ama.search@example.com',
+            ])->id,
+        ]);
+        $byStaffNumber = Teacher::factory()->create([
+            'school_id' => $school->id,
+            'staff_number' => 'STF-SEARCH-9',
+            'client_id' => Client::factory()->teacher()->create([
+                'name' => 'Yaw Asante',
+                'email' => 'yaw@example.com',
+            ])->id,
+        ]);
+        Teacher::factory()->create([
+            'school_id' => $school->id,
+            'staff_number' => 'STF-9999',
+            'client_id' => Client::factory()->teacher()->create([
+                'name' => 'Other Teacher',
+                'email' => 'other@example.com',
+            ])->id,
+        ]);
+
+        $this->withToken($token)
+            ->getJson(route('api.schools.teachers.index', [
+                'school' => $school,
+                'searchTerm' => 'mensah',
+            ]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $byName->id)
+            ->assertJsonPath('meta.total', 1);
+
+        $this->withToken($token)
+            ->getJson(route('api.schools.teachers.index', [
+                'school' => $school,
+                'searchTerm' => 'ama.search',
+            ]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $byEmail->id);
+
+        $this->withToken($token)
+            ->getJson(route('api.schools.teachers.index', [
+                'school' => $school,
+                'searchTerm' => 'SEARCH-9',
+            ]))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $byStaffNumber->id);
+    }
+
     public function test_owners_can_show_a_teacher(): void
     {
         ['school' => $school, 'token' => $token] = $this->ownerContext();

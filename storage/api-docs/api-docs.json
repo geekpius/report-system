@@ -4178,6 +4178,17 @@
                         }
                     },
                     {
+                        "name": "searchTerm",
+                        "in": "query",
+                        "description": "Filter by admission number or student name.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "doe",
+                            "maxLength": 255
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -4245,6 +4256,16 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
                                 }
                             }
                         }
@@ -5665,6 +5686,17 @@
                         }
                     },
                     {
+                        "name": "searchTerm",
+                        "in": "query",
+                        "description": "Filter by teacher name, email, or staff number.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "mensah",
+                            "maxLength": 255
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "required": false,
@@ -5732,6 +5764,16 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ApiError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
                                 }
                             }
                         }

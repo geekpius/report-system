@@ -27,7 +27,6 @@ class StoreClassSubjectTeacherAction
                         'subject_id' => $subjectId,
                         'teacher_id' => $validated['teacherId'],
                     ]))
-                    ->each(fn (ClassSubjectTeacher $assignment) => $assignment->load(['schoolClass', 'subject', 'teacher']))
                     ->values();
             });
         } catch (Throwable $exception) {

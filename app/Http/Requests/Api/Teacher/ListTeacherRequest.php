@@ -26,6 +26,8 @@ class ListTeacherRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [];
+        return [
+            'searchTerm' => ['sometimes', 'nullable', 'string', 'max:255'],
+        ];
     }
 }

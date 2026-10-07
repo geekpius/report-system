@@ -30,6 +30,7 @@ class TeacherController extends Controller
         tags: ['Teachers'],
         parameters: [
             new OA\Parameter(name: 'school', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
+            new OA\Parameter(name: 'searchTerm', in: 'query', required: false, description: 'Filter by teacher name, email, or staff number.', schema: new OA\Schema(type: 'string', maxLength: 255, example: 'mensah')),
             new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 1, example: 1)),
             new OA\Parameter(name: 'perPage', in: 'query', required: false, schema: new OA\Schema(type: 'integer', minimum: 1, maximum: 100, example: 15)),
         ],
@@ -48,11 +49,12 @@ class TeacherController extends Controller
             ),
             new OA\Response(response: 401, description: 'Unauthenticated', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
             new OA\Response(response: 403, description: 'Forbidden', content: new OA\JsonContent(ref: '#/components/schemas/ApiError')),
+            new OA\Response(response: 422, description: 'Validation error', content: new OA\JsonContent(ref: '#/components/schemas/ValidationError')),
         ]
     )]
     public function index(ListTeacherRequest $request, School $school, ListTeacherAction $action): JsonResponse
     {
-        return $action->handle($school);
+        return $action->handle($request, $school);
     }
 
     #[OA\Post(
