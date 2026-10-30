@@ -3,9 +3,13 @@
 namespace Tests\Feature\Api;
 
 use App\Enums\ScoringMode;
+use App\Models\AcademicYear;
 use App\Models\Client;
+use App\Models\Mark;
 use App\Models\MarkSetting;
 use App\Models\School;
+use App\Models\Student;
+use App\Models\Term;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -207,6 +211,69 @@ class MarkSettingTest extends TestCase
             ]))
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['totalScore.examScorePercent']);
+    }
+
+    public function test_owners_cannot_update_mark_settings_when_current_term_has_marks(): void
+    {
+        $owner = Client::factory()->owner()->create();
+        $school = School::factory()->for($owner, 'owner')->create();
+        MarkSetting::factory()->create(['school_id' => $school->id]);
+        $academicYear = AcademicYear::factory()->current()->create(['school_id' => $school->id]);
+        $term = Term::factory()->current()->create(['academic_year_id' => $academicYear->id]);
+        $student = Student::factory()->create(['school_id' => $school->id]);
+        Mark::factory()->create([
+            'student_id' => $student->id,
+            'academic_year_id' => $academicYear->id,
+            'term_id' => $term->id,
+        ]);
+        $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
+
+        $this->withToken($token)
+            ->putJson(route('api.schools.mark-settings.update', $school), $this->totalScorePayload([
+                'totalScore' => [
+                    'classScorePercent' => 40,
+                    'examScorePercent' => 60,
+                ],
+            ]))
+            ->assertUnprocessable()
+            ->assertJsonPath('success', false)
+            ->assertJsonPath(
+                'message',
+                'Mark settings cannot be updated while marks exist for the current academic year and term.',
+            );
+
+        $this->assertDatabaseHas('mark_settings', [
+            'school_id' => $school->id,
+            'class_score_percent' => 50,
+            'exam_score_percent' => 50,
+        ]);
+    }
+
+    public function test_owners_can_update_mark_settings_when_marks_exist_for_a_non_current_term(): void
+    {
+        $owner = Client::factory()->owner()->create();
+        $school = School::factory()->for($owner, 'owner')->create();
+        MarkSetting::factory()->create(['school_id' => $school->id]);
+        $academicYear = AcademicYear::factory()->current()->create(['school_id' => $school->id]);
+        Term::factory()->current()->create(['academic_year_id' => $academicYear->id]);
+        $previousTerm = Term::factory()->create(['academic_year_id' => $academicYear->id]);
+        $student = Student::factory()->create(['school_id' => $school->id]);
+        Mark::factory()->create([
+            'student_id' => $student->id,
+            'academic_year_id' => $academicYear->id,
+            'term_id' => $previousTerm->id,
+        ]);
+        $token = $owner->createToken('api-owner', ['permit:owner'])->plainTextToken;
+
+        $this->withToken($token)
+            ->putJson(route('api.schools.mark-settings.update', $school), $this->totalScorePayload([
+                'totalScore' => [
+                    'classScorePercent' => 40,
+                    'examScorePercent' => 60,
+                ],
+            ]))
+            ->assertOk()
+            ->assertJsonPath('data.totalScore.classScorePercent', 40);
     }
 
     public function test_owners_cannot_manage_mark_settings_for_another_school(): void

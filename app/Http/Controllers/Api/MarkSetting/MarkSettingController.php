@@ -46,7 +46,7 @@ class MarkSettingController extends Controller
     #[OA\Put(
         path: '/schools/{school}/mark-settings',
         summary: 'Update mark settings',
-        description: 'Updates the active scoring mode and the configuration for that mode only. Send totalScore when scoringMode is total_score, or divisionScore when scoringMode is division_score. divisionTotal and divisionTotalPercent are derived by the backend.',
+        description: 'Updates the active scoring mode and the configuration for that mode only. Send totalScore when scoringMode is total_score, or divisionScore when scoringMode is division_score. divisionTotal and divisionTotalPercent are derived by the backend. Updates are rejected when marks already exist for the school\'s current academic year and current term.',
         security: [['sanctum' => []]],
         tags: ['Mark Settings'],
         parameters: [

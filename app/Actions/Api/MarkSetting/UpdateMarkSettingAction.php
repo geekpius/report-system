@@ -6,8 +6,10 @@ use App\Concerns\ApiResponse;
 use App\Enums\ScoringMode;
 use App\Http\Requests\Api\MarkSetting\UpdateMarkSettingRequest;
 use App\Http\Resources\MarkSettingResource;
+use App\Models\Mark;
 use App\Models\MarkSetting;
 use App\Models\School;
+use App\Models\Term;
 use Illuminate\Http\JsonResponse;
 use Throwable;
 
@@ -21,6 +23,26 @@ class UpdateMarkSettingAction
 
         if ($setting === null) {
             $setting = $school->markSetting()->create(MarkSetting::defaults());
+        }
+
+        $currentAcademicYear = $school->currentAcademicYear()->first(['id']);
+
+        if ($currentAcademicYear !== null) {
+            $currentTerm = Term::query()
+                ->where('academic_year_id', $currentAcademicYear->id)
+                ->where('is_current', true)
+                ->first(['id']);
+
+            if ($currentTerm !== null && Mark::query()
+                ->where('school_id', $school->id)
+                ->where('academic_year_id', $currentAcademicYear->id)
+                ->where('term_id', $currentTerm->id)
+                ->exists()) {
+                return $this->error(
+                    'Mark settings cannot be updated while marks exist for the current academic year and term.',
+                    422,
+                );
+            }
         }
 
         $scoringMode = ScoringMode::from($request->string('scoringMode')->toString());

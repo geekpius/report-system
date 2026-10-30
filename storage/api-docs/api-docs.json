@@ -3107,7 +3107,7 @@
                     "Mark Settings"
                 ],
                 "summary": "Update mark settings",
-                "description": "Updates the active scoring mode and the configuration for that mode only. Send totalScore when scoringMode is total_score, or divisionScore when scoringMode is division_score. divisionTotal and divisionTotalPercent are derived by the backend.",
+                "description": "Updates the active scoring mode and the configuration for that mode only. Send totalScore when scoringMode is total_score, or divisionScore when scoringMode is division_score. divisionTotal and divisionTotalPercent are derived by the backend. Updates are rejected when marks already exist for the school's current academic year and current term.",
                 "operationId": "7c3c2d9ba637fbdd5ba18609cd91d020",
                 "parameters": [
                     {
