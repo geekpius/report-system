@@ -260,6 +260,33 @@ class MarkEntryTest extends TestCase
             ->assertJsonCount(0, 'data');
     }
 
+    public function test_students_marked_as_not_participating_are_excluded_from_pending_exam_marks(): void
+    {
+        $context = $this->setupEntryContext();
+
+        $this->withToken($context['token'])
+            ->putJson(
+                route('api.schools.exam-marks.upsert', $context['school']),
+                $this->examPayload($context, $context['recordedStudent'], $context['recordedEnrollment'], [
+                    'participated' => false,
+                ]),
+            )
+            ->assertCreated();
+
+        $this->withToken($context['token'])
+            ->getJson(route('api.schools.exam-marks.pending', $context['school']).'?'.http_build_query($this->entryQuery($context)))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.studentId', $context['pendingStudent']->id);
+
+        $this->withToken($context['token'])
+            ->getJson(route('api.schools.exam-marks.recorded', $context['school']).'?'.http_build_query($this->entryQuery($context)))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.studentId', $context['recordedStudent']->id)
+            ->assertJsonPath('data.0.mark.participated', false);
+    }
+
     public function test_students_without_the_subject_are_excluded(): void
     {
         $context = $this->setupEntryContext();

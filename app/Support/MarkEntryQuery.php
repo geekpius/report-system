@@ -118,14 +118,18 @@ class MarkEntryQuery
         if ($recorded) {
             return $query
                 ->where('marks.close_exam_score_entry', false)
-                ->where('marks.exam_score', '>', 0);
+                ->where(function (Builder $query): void {
+                    $query->where('marks.exam_score', '>', 0)
+                        ->orWhere('marks.participated', false);
+                });
         }
 
         return $query->where(function (Builder $query): void {
             $query->whereNull('marks.id')
                 ->orWhere(function (Builder $query): void {
                     $query->where('marks.close_exam_score_entry', false)
-                        ->where('marks.exam_score', '<=', 0);
+                        ->where('marks.exam_score', '<=', 0)
+                        ->where('marks.participated', true);
                 });
         });
     }
